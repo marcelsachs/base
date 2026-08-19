@@ -1,0 +1,62 @@
+{
+    "layer": "top",
+    "position": "bottom",
+    "height": 22,
+    "spacing": 0,
+    "modules-left": ["hyprland/workspaces"],
+    "modules-right": [
+        "network#eth",
+        "network#wifi",
+        "temperature",
+        "cpu",
+        "load",
+        "memory",
+        "pulseaudio",
+        "clock"
+    ],
+    "hyprland/workspaces": {
+        "format": "{name}"
+    },
+    "network#eth": {
+        "interface": "en*",
+        "interval": 1,
+        "format-ethernet": " E: {ipaddr} ",
+        "format-disconnected": " E: down ",
+        "format-linked": " E: down ",
+        "tooltip": false
+    },
+    "network#wifi": {
+        "interface": "wl*",
+        "interval": 1,
+        "format-wifi": " W: {essid} {ipaddr} ({signalStrength}%) ",
+        "format-disconnected": " W: down ",
+        "tooltip": false
+    },
+    "temperature": {
+        "interval": 1,
+        "hwmon-path": "/sys/class/hwmon/hwmon1/temp1_input",
+        "format": " CPU {temperatureC} °C "
+    },
+    "cpu": {
+        "interval": 1,
+        "format": " CPU: {usage}% "
+    },
+    "load": {
+        "interval": 1,
+        "format": " load: {load1} "
+    },
+    "memory": {
+        "interval": 1,
+        "format": " mem: {used:0.1f}G "
+    },
+    "pulseaudio": {
+        "format": " ♪ {volume}% ",
+        "format-muted": " muted ({volume}%) ",
+        "tooltip": false
+    },
+    "clock": {
+        "interval": 1,
+        "format": " {:%d.%m.%Y | %H:%M:%S} ",
+        "tooltip": false
+    }
+}
