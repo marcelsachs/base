@@ -1,0 +1,276 @@
+#!/usr/bin/env bash
+# n6 - STM32N6 load / debug. OpenOCD + gdb. Never reset a running AXISRAM image:
+# reset re-runs the boot ROM and wipes RAM.
+#
+#   n6 [-b BOARD] info
+#   n6 [-b BOARD] load ELF
+#   n6 [-b BOARD] mon
+#   n6 [-b BOARD] gdb [-l] ELF     # OpenOCD :3333, gdb-dashboard. -l = n6-load
+#   n6 [-b BOARD] dash ELF         # tmux: STM32N657 AXISRAM board Neural-ART | gdb | uart
+#   n6 check                      # host toolchain on PATH
+#
+# BOARD: the plugged ST-LINK. -b / $N6_BOARD / cwd only if both are plugged.
+set -euo pipefail
+N6_SHARE=${N6_SHARE:-/etc/n6}
+GDBDIR=$N6_SHARE/gdb
+export HW_BOARDS=${HW_BOARDS:-$N6_SHARE/boards}
+export PATH
+
+die() { printf 'n6: %s\n' "$*" >&2; exit 2; }
+
+present_boards() {
+  local n s c x
+  while read -r n s c x; do
+    [[ -z ${n-} || $n == \#* ]] && continue
+    [[ $n == *-dfu ]] && continue
+    [[ $s != - && -e /dev/stlink/$s ]] && printf '%s\n' "$n"
+  done <"$HW_BOARDS"
+}
+
+pick_board() {
+  local b= present
+  mapfile -t present < <(present_boards)
+  if [[ ${#present[@]} -eq 1 ]]; then
+    printf '%s\n' "${present[0]}"
+    return
+  fi
+  if [[ -n ${N6_BOARD-} ]]; then
+    printf '%s\n' "$N6_BOARD"
+    return
+  fi
+  case $PWD in
+    /drone|/drone/*) b=openmv ;;
+    /sentry|/sentry/*) b=nucleo ;;
+  esac
+  if [[ -n $b ]]; then
+    printf '%s\n' "$b"
+    return
+  fi
+  if [[ ${#present[@]} -gt 1 ]]; then
+    die "both ST-LINKs plugged. -b openmv | nucleo"
+  fi
+  die "no ST-LINK. plug OpenMV MiniE or Nucleo CN10"
+}
+
+gdb_has_python() {
+  "$1" --batch -ex 'python print("pyok")' -ex quit 2>/dev/null | grep -q pyok
+}
+pick_gdb() {
+  local g path
+  if [[ -n ${GDB-} ]]; then
+    path=$(command -v "$GDB" || true)
+    [[ -n $path ]] || die "GDB=$GDB not found"
+    printf '%s\n' "$path"
+    return
+  fi
+  for g in gdb arm-none-eabi-gdb; do
+    path=$(command -v "$g") || continue
+    if gdb_has_python "$path"; then
+      printf '%s\n' "$path"
+      return
+    fi
+  done
+  path=$(command -v arm-none-eabi-gdb || command -v gdb) || die "no gdb"
+  printf '%s\n' "$path"
+}
+
+n6_check() {
+  local fail=0 g gdb_py tmp
+  need() {
+    if command -v "$1" >/dev/null 2>&1; then
+      printf 'ok   %s  %s\n' "$1" "$("$1" --version 2>/dev/null | head -1)"
+    else
+      printf 'MISS %s\n' "$1"
+      fail=1
+    fi
+  }
+  need arm-none-eabi-gcc
+  need arm-none-eabi-gdb
+  need arm-none-eabi-objdump
+  need arm-none-eabi-size
+  need gcc
+  need gdb
+  need openocd
+  need tmux
+  need picocom
+  need make
+  if command -v stprogr >/dev/null 2>&1 && stprogr --version >/dev/null 2>&1; then
+    printf 'ok   stprogr  %s\n' "$(stprogr --version 2>/dev/null | head -1)"
+  else
+    printf 'MISS stprogr\n'
+  fi
+  if command -v stedgeai >/dev/null 2>&1 && stedgeai --version >/dev/null 2>&1; then
+    printf 'ok   stedgeai  %s\n' "$(stedgeai --version 2>/dev/null | head -1)"
+  else
+    printf 'MISS stedgeai\n'
+  fi
+  tmp=$(mktemp /tmp/n6-cc-XXXXXX.o)
+  if arm-none-eabi-gcc -mcpu=cortex-m55 -mthumb -c -x c /dev/null -o "$tmp" 2>/dev/null; then
+    printf 'ok   gcc -mcpu=cortex-m55\n'
+  else
+    printf 'MISS gcc cortex-m55\n'
+    fail=1
+  fi
+  rm -f "$tmp"
+  gdb_py=
+  for g in gdb arm-none-eabi-gdb; do
+    command -v "$g" >/dev/null 2>&1 || continue
+    if gdb_has_python "$(command -v "$g")"; then
+      gdb_py=$(command -v "$g")
+      break
+    fi
+  done
+  if [[ -n $gdb_py ]]; then
+    printf 'ok   gdb python (gdb-dashboard)  %s\n' "$gdb_py"
+  else
+    printf 'MISS gdb python — dashboard will not load\n'
+    fail=1
+  fi
+  tmp=$(mktemp /tmp/n6-ocd-XXXXXX.txt)
+  openocd -c "echo [find target/stm32n6x.cfg]" -c shutdown >"$tmp" 2>&1 || true
+  if grep -q stm32n6x "$tmp"; then
+    printf 'ok   openocd stm32n6x.cfg\n'
+  else
+    printf 'MISS openocd stm32n6x.cfg\n'
+    tail -5 "$tmp"
+    fail=1
+  fi
+  rm -f "$tmp"
+  return "$fail"
+}
+
+BOARD=
+ARGS=()
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -b) BOARD=${2:?BOARD}; shift 2 ;;
+    *) ARGS+=("$1"); shift ;;
+  esac
+done
+set -- "${ARGS[@]}"
+cmd=${1:-}; shift || true
+[[ -n $cmd ]] || { sed -n '/^# n6 /,/^set -/p' "$0" | sed 's/^# \{0,1\}//;/^set /d'; exit 1; }
+
+if [[ $cmd == check ]]; then
+  n6_check
+  exit
+fi
+
+if [[ -z $BOARD ]]; then
+  BOARD=$(pick_board)
+fi
+export N6_BOARD=$BOARD
+
+gdb_run() {
+  local load=$1 elf=$2
+  shift 2
+  [[ -f $elf ]] || die "no file $elf"
+  command -v openocd >/dev/null || die "openocd not on PATH"
+  local gdb sn
+  gdb=$(pick_gdb)
+  [[ -x $gdb ]] || die "no gdb"
+  sn=$(hw serial "$BOARD")
+  local ex=( -q )
+  [[ -f $GDBDIR/dashboard.gdbinit ]] && ex+=( -x "$GDBDIR/dashboard.gdbinit" )
+  [[ -f $GDBDIR/n6.gdb ]] && ex+=( -x "$GDBDIR/n6.gdb" )
+  ex+=( -ex 'target extended-remote :3333' -ex 'monitor halt' )
+  (( load )) && ex+=( -ex 'n6-load' )
+  bash -c "
+    openocd -f interface/stlink.cfg -c 'adapter serial $sn' -f target/stm32n6x.cfg \
+      -c 'gdb_port 3333' -c 'tcl_port 6666' -c 'telnet_port 4444' &
+    ocd=\$!
+    trap 'kill \$ocd 2>/dev/null' EXIT
+    sleep 0.5
+    exec $(printf '%q ' "$gdb") $(printf '%q ' "${ex[@]}") $(printf '%q ' "$@") $(printf '%q' "$elf")
+  "
+}
+
+io_title() {
+  case $BOARD in
+    nucleo) printf 'Nucleo' ;;
+    *) printf 'OpenMV' ;;
+  esac
+}
+
+case $cmd in
+  info)
+    hw ls
+    echo
+    echo "board $BOARD  serial=$(hw serial "$BOARD")  tty=$(hw tty "$BOARD" 2>/dev/null || echo none)"
+    ;;
+  load)
+    gdb_run 1 "${1:?ELF}" --batch -ex quit
+    ;;
+  mon)
+    tty=$(hw tty "$BOARD") || die "no VCP for $BOARD"
+    exec picocom -q -b 115200 "$tty"
+    ;;
+  gdb)
+    load=0
+    [[ ${1-} == -l ]] && { load=1; shift; }
+    gdb_run "$load" "${1:?ELF}"
+    ;;
+  dash)
+    elf=${1:?ELF}
+    [[ -f $elf ]] || die "no file $elf"
+    if command -v tmux >/dev/null && [[ -t 1 ]]; then
+      local_io=$(io_title)
+      sess=n6dash
+      tmux has-session -t "$sess" 2>/dev/null && tmux kill-session -t "$sess"
+      killall -q openocd 2>/dev/null || true
+      tty=$(hw tty "$BOARD" 2>/dev/null || true)
+      if [[ -n ${tty-} ]]; then
+        pkill -f "picocom -q -b 115200 ${tty}" >/dev/null 2>&1 || true
+      fi
+      sleep 0.2
+      chip=$(tmux new-session -d -s "$sess" -n n6 -x 240 -y 62 -P -F '#{pane_id}' \
+        "printf '\\033[H\\033[J STM32N657  halt to draw\\n'; exec sleep inf") || die "tmux new-session"
+      tmux set-option -t "$sess" default-size 240x62
+      tmux resize-window -t "$sess:n6" -x 240 -y 62
+      tmux select-pane -t "$chip" -T STM32N657
+      mem=$(tmux split-window -h -t "$chip" -p 50 -P -F '#{pane_id}' \
+        "printf '\\033[H\\033[J AXISRAM  halt to draw\\n'; exec sleep inf")
+      tmux select-pane -t "$mem" -T AXISRAM
+      io=$(tmux split-window -v -t "$chip" -p 50 -P -F '#{pane_id}' \
+        "printf '\\033[H\\033[J $local_io  halt to draw\\n'; exec sleep inf")
+      tmux select-pane -t "$io" -T "$local_io"
+      npu=$(tmux split-window -v -t "$mem" -p 50 -P -F '#{pane_id}' \
+        "printf '\\033[H\\033[J Neural-ART  halt to draw\\n'; exec sleep inf")
+      tmux select-pane -t "$npu" -T Neural-ART
+      chip_tty=$(tmux display-message -p -t "$chip" '#{pane_tty}')
+      mem_tty=$(tmux display-message -p -t "$mem" '#{pane_tty}')
+      io_tty=$(tmux display-message -p -t "$io" '#{pane_tty}')
+      npu_tty=$(tmux display-message -p -t "$npu" '#{pane_tty}')
+      gdbp=$(tmux split-window -f -v -t "$sess:n6" -p 32 -P -F '#{pane_id}' \
+        "export N6_DASH_CHIP=$chip_tty N6_DASH_MEM=$mem_tty N6_DASH_IO=$io_tty N6_DASH_NPU=$npu_tty N6_BOARD=$BOARD; exec \"$0\" -b \"$BOARD\" gdb -l \"$elf\"")
+      tmux select-pane -t "$gdbp" -T gdb
+      uart=$(tmux split-window -f -v -t "$sess:n6" -p 12 -P -F '#{pane_id}' \
+        "bash -c 'while ! \"$0\" -b \"$BOARD\" mon; do echo waiting VCP; sleep 1; done'")
+      tmux select-pane -t "$uart" -T uart
+      tmux resize-pane -t "$uart" -y 8
+      tmux resize-pane -t "$gdbp" -y 18
+      tmux set-option -t "$sess" pane-border-status top
+      tmux set-option -t "$sess" pane-border-format ' #{pane_title} '
+      tmux set-option -t "$sess" status on
+      tmux set-option -t "$sess" status-left '[n6] '
+      tmux set-option -t "$sess" status-right ' C-b o  C-b z  n6-go '
+      tmux bind-key -T prefix Tab select-pane -t :.+
+      tmux select-pane -t "$gdbp"
+      (
+        for _ in $(seq 1 40); do
+          w=$(tmux display-message -p -t "$chip" '#{pane_width}' 2>/dev/null || echo 0)
+          if [[ ${w:-0} -ge 80 ]] && tmux capture-pane -t "$gdbp" -p 2>/dev/null | grep -q '>>>'; then
+            tmux resize-pane -t "$uart" -y 8
+            tmux resize-pane -t "$gdbp" -y 18
+            tmux send-keys -t "$gdbp" -H 6e 36 2d 67 6f 0d
+            break
+          fi
+          sleep 0.25
+        done
+      ) >/dev/null 2>&1 &
+      exec tmux attach-session -t "$sess"
+    fi
+    gdb_run 1 "$elf"
+    ;;
+  *) die "unknown command $cmd" ;;
+esac

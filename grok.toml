@@ -1,0 +1,9 @@
+[models]
+default = "grok-4.6"
+
+[ui]
+permission_mode = "default"
+yolo = false
+
+[subagents]
+enabled = true

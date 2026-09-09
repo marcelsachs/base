@@ -1,0 +1,79 @@
+{
+    "layer": "top",
+    "position": "bottom",
+    "height": 22,
+    "spacing": 0,
+    "modules-left": ["sway/workspaces"],
+    "modules-right": [
+        "network#eth",
+        "network#wifi",
+        "custom/tailscale",
+        "temperature",
+        "cpu",
+        "custom/gpu",
+        "load",
+        "memory",
+        "pulseaudio",
+        "clock"
+    ],
+    "sway/workspaces": {
+        "format": "{name}"
+    },
+    "network#eth": {
+        "interface": "en*",
+        "interval": 1,
+        "format-ethernet": " E: {ipaddr} ",
+        "format-disconnected": " E: down ",
+        "format-linked": " E: down ",
+        "tooltip": false
+    },
+    "network#wifi": {
+        "interface": "wl*",
+        "interval": 1,
+        "format-wifi": " W: {essid} {ipaddr} ({signalStrength}%) ",
+        "format-disconnected": " W: down ",
+        "tooltip": false
+    },
+    "custom/tailscale": {
+        "exec": "/etc/xdg/waybar/tailscale",
+        "return-type": "json",
+        "interval": 5,
+        "tooltip": false
+    },
+    "temperature": {
+        "interval": 1,
+        "hwmon-path-abs": "/sys/devices/pci0000:00/0000:00:18.3/hwmon",
+        "input-filename": "temp1_input",
+        "format": " CPU: {temperatureC}°C ",
+        "tooltip": false
+    },
+    "cpu": {
+        "interval": 1,
+        "format": "{usage}% ",
+        "tooltip": false
+    },
+    "custom/gpu": {
+        "exec": "/etc/xdg/waybar/gpu",
+        "return-type": "json",
+        "interval": 1,
+        "tooltip": false
+    },
+    "load": {
+        "interval": 1,
+        "format": " load: {load1} "
+    },
+    "memory": {
+        "interval": 1,
+        "format": " mem: {used:0.1f}G "
+    },
+    "pulseaudio": {
+        "format": " ♪ {volume}% ",
+        "format-muted": " muted ({volume}%) ",
+        "tooltip": false
+    },
+    "clock": {
+        "interval": 1,
+        "format": " {:%d.%m.%Y %H:%M:%S} ",
+        "tooltip": false
+    }
+}

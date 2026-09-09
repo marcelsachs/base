@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# NVIDIA has no hwmon on this driver. nvidia-smi is the load and temp.
+set -euo pipefail
+out=$(nvidia-smi --query-gpu=utilization.gpu,temperature.gpu --format=csv,noheader,nounits 2>/dev/null || true)
+out=${out%%$'\n'*}
+a=${out// /}
+util=${a%%,*}
+temp=${a#*,}
+if [[ $util =~ ^[0-9]+$ && $temp =~ ^[0-9]+$ ]]; then
+  printf '{"text":" GPU: %s°C %s%% ","class":"connected"}\n' "$temp" "$util"
+else
+  printf '{"text":" GPU: down ","class":"disconnected"}\n'
+fi

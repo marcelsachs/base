@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# tailscale0 operstate is UNKNOWN, so waybar network treats it as down.
+set -euo pipefail
+a=
+if out=$(ip -4 -o addr show tailscale0 2>/dev/null); then
+  a=${out##* inet }
+  a=${a%%/*}
+fi
+if [[ -n $a ]]; then
+  printf '{"text":" T: %s ","class":"connected"}\n' "$a"
+else
+  printf '{"text":" T: down ","class":"disconnected"}\n'
+fi
