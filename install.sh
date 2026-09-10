@@ -12,12 +12,15 @@ EDGE="$STDIR/stedgeai-linux-offline"
 KEY="$HERE/../secrets/id_ed25519"
 PW="$HERE/../secrets/password.hash"
 TS="$HERE/../secrets/tailscale.key"
+CK="$HERE/../secrets/cache.key"
 BG="$HERE/../home/.config/sway/bg"
+CACHE=$(cd "$HERE/.." && pwd)/cache
 [[ -f $CUBE ]] || { echo "st: missing $CUBE" >&2; exit 1; }
 [[ -f $EDGE ]] || { echo "st: missing $EDGE" >&2; exit 1; }
 [[ -f $KEY ]] || { echo "secrets: missing $KEY" >&2; exit 1; }
 [[ -f $PW ]] || { echo "secrets: missing $PW (mkpasswd -m sha-512 > $PW)" >&2; exit 1; }
 [[ -f $TS ]] || { echo "secrets: missing $TS (reusable, pre-approved tailscale auth key)" >&2; exit 1; }
+[[ -f $CK ]] || { echo "secrets: missing $CK (nix key generate-secret --key-name blackwell > $CK)" >&2; exit 1; }
 [[ -f $BG ]] || { echo "home: missing $BG (the wallpaper)" >&2; exit 1; }
 [[ -d $HERE/.git ]] || { echo "nix: $HERE is not a git checkout" >&2; exit 1; }
 
@@ -36,6 +39,7 @@ mkdir -p /mnt/etc/nixos
 cp -a "$HERE"/. /mnt/etc/nixos/
 install -D -m 600 "$PW" /mnt/var/lib/secrets/password.hash
 install -m 600 "$TS" /mnt/var/lib/secrets/tailscale.key
+install -m 600 "$CK" /mnt/var/lib/secrets/cache.key
 
 echo "st: add vendor blobs to /mnt store"
 nix --extra-experimental-features nix-command --store /mnt \
@@ -43,9 +47,17 @@ nix --extra-experimental-features nix-command --store /mnt \
 nix --extra-experimental-features nix-command --store /mnt \
   store add --mode flat --hash-algo sha256 --name "$(basename "$EDGE")" "$EDGE"
 
+# The stick's cache (written by cache.sh) comes first; whatever it lacks is downloaded.
+SUBST="https://install.determinate.systems"
+KEYS="cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM="
+if [[ -d $CACHE ]]; then
+  SUBST="file://$CACHE?priority=10 $SUBST"
+  KEYS="$(nix --extra-experimental-features nix-command key convert-secret-to-public < "$CK") $KEYS"
+fi
+
 nixos-install --no-root-passwd --flake /mnt/etc/nixos#blackwell \
-  --option extra-substituters https://install.determinate.systems \
-  --option extra-trusted-public-keys cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM=
+  --option extra-substituters "$SUBST" \
+  --option extra-trusted-public-keys "$KEYS"
 
 install -d -m 700 /mnt/home/sachs/.ssh
 install -m 600 "$KEY" /mnt/home/sachs/.ssh/id_ed25519
