@@ -20,8 +20,8 @@ clone_desk() {
   git -C "$dest" lfs pull
 }
 
-clone_desk /drone  git@github.com:marcelsachs/drone.git
-clone_desk /sentry git@github.com:marcelsachs/sentry.git
+clone_desk /drone  https://github.com/marcelsachs/drone.git
+clone_desk /sentry https://github.com/marcelsachs/sentry.git
 
 chmod 2775 /drone /sentry
 echo "desks cloned."
