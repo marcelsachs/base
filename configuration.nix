@@ -5,6 +5,7 @@
 }:
 {
   imports = [
+    ./tools.nix
     ./users.nix
   ];
 
@@ -66,6 +67,10 @@
   services.tailscale.openFirewall = true;
 
   services.udev.extraRules = ''
+    SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="374?|375?", TAG+="uaccess", MODE="0666", SYMLINK+="stlink/$attr{serial}"
+    SUBSYSTEM=="tty", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="374?|375?", SYMLINK+="tty-stlink/$attr{serial}"
+    SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", TAG+="uaccess", MODE="0666", SYMLINK+="stm32dfu"
+    SUBSYSTEM=="tty", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", TAG+="uaccess", SYMLINK+="tty-stm32/$attr{serial}"
     SUBSYSTEM=="drm", KERNEL=="card[0-9]", KERNELS=="0000:01:00.0", SYMLINK+="dri/nvidia-card"
   '';
 
@@ -189,9 +194,6 @@
   systemd.tmpfiles.rules = [
     "d /downloads 0775 sachs wheel -"
     "d /tinygrad 0775 sachs wheel -"
-    "d /sachs/.grok 0755 sachs users -"
-    "L+ /sachs/.grok/AGENTS.md - sachs users - /etc/nixos/AGENTS.md"
-    "L+ /sachs/.grok/config.toml - sachs users - /etc/nixos/grok.toml"
     "z /etc/nixos 0775 sachs wheel -"
   ];
 
@@ -272,7 +274,6 @@
     shopt -s histappend
     PROMPT_COMMAND="history -a; history -n''${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
     alias r=ranger
-    [[ -r $HOME/.grok/completions/bash/grok.bash ]] && . "$HOME/.grok/completions/bash/grok.bash"
   '';
 
   environment.systemPackages = with pkgs; [
@@ -295,7 +296,6 @@
     cudaPackages.cuda_nvrtc
     cudaPackages.cuda_cudart
     cudaPackages.libnvjitlink
-    (callPackage ./grok.nix { })
     (python3.withPackages (
       ps: with ps; [
         pip
