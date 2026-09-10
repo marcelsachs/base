@@ -111,7 +111,11 @@ in
   programs.sway.enable = true;
   programs.sway.wrapperFeatures.gtk = true;
   # Monitors are on the Raphael iGPU; the RTX is compute-only and stays out of sway.
-  programs.sway.extraSessionCommands = "export WLR_DRM_DEVICES=/dev/dri/by-path/pci-0000:0e:00.0-card";
+  # WLR_DRM_DEVICES is colon-separated, so the by-path name (pci-0000:0e:00.0-card) can't be used.
+  services.udev.extraRules = ''
+    SUBSYSTEM=="drm", KERNEL=="card[0-9]*", DRIVERS=="amdgpu", SYMLINK+="dri/igpu"
+  '';
+  programs.sway.extraSessionCommands = "export WLR_DRM_DEVICES=/dev/dri/igpu";
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
   programs.foot = {
     enable = true;
