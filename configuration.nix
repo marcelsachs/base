@@ -220,7 +220,13 @@
   programs.direnv.enable = true;
   programs.direnv.nix-direnv.enable = true;
   programs.direnv.enableBashIntegration = true;
-  programs.direnv.settings.global.hide_env_diff = true;
+  programs.direnv.settings = {
+    global.hide_env_diff = true;
+    whitelist.prefix = [
+      "/drone"
+      "/sentry"
+    ];
+  };
 
   programs.ssh.knownHosts.github = {
     hostNames = [ "github.com" ];
