@@ -114,6 +114,8 @@ in
   # WLR_DRM_DEVICES is colon-separated, so the by-path name (pci-0000:0e:00.0-card) can't be used.
   services.udev.extraRules = ''
     SUBSYSTEM=="drm", KERNEL=="card[0-9]*", DRIVERS=="amdgpu", SYMLINK+="dri/igpu"
+    # NUCLEO-N657X0-Q: its on-board STLINK-V3EC, matched by serial so no other probe or DFU device is opened up.
+    SUBSYSTEM=="usb", ATTR{idVendor}=="0483", ATTR{idProduct}=="3754", ATTR{serial}=="003300243234510337333934", MODE="0660", GROUP="dialout"
   '';
   programs.sway.extraSessionCommands = "export WLR_DRM_DEVICES=/dev/dri/igpu";
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
