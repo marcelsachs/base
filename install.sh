@@ -2,10 +2,10 @@
 set -euo pipefail
 SECONDS=0
 [[ $(id -u) -eq 0 ]] || { echo "run as root" >&2; exit 1; }
+mountpoint -q /usb || mount --mkdir /dev/mapper/sda1 /usb
+HERE=/usb/nix
 
 DISK=/dev/nvme0n1
-HERE=$(cd "$(dirname "$0")" && pwd)
-[[ $HERE == /usb/nix ]] || { echo "mount usb at /usb" >&2; exit 1; }
 STDIR=$(cd "$HERE/../st" && pwd)
 CUBE="$STDIR/SetupSTM32CubeProgrammer_linux_64.zip"
 EDGE="$STDIR/stedgeai-linux-offline"
@@ -43,5 +43,6 @@ nixos-install --no-root-passwd --flake /mnt/etc/nixos#blackwell \
 install -d -m 700 -o 1000 -g 100 /mnt/sachs/.ssh
 install -m 600 -o 1000 -g 100 "$KEY" /mnt/sachs/.ssh/id_ed25519
 install -m 644 -o 1000 -g 100 "$KEY.pub" /mnt/sachs/.ssh/id_ed25519.pub
+rmdir /mnt/home 2>/dev/null || true
 
 echo $SECONDS
