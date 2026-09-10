@@ -17,7 +17,7 @@ in
   boot.loader.systemd-boot.enable = true;
   boot.loader.systemd-boot.configurationLimit = 8;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.loader.timeout = 0;
+  boot.loader.timeout = 3;
   boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.kernelParams = [ "nowatchdog" ];
 
@@ -37,36 +37,32 @@ in
   networking.useNetworkd = true;
   networking.wireless.iwd.enable = true;
 
+  # SSH: keys only, reachable only over the tailnet. Root is reached via sudo.
   services.openssh.enable = true;
+  services.openssh.openFirewall = false;
+  services.openssh.settings.PasswordAuthentication = false;
   services.openssh.settings.PrintLastLog = false;
+  networking.firewall.trustedInterfaces = [ "tailscale0" ];
+  services.tailscale.enable = true;
+  services.tailscale.openFirewall = true;
 
+  # One password for console and rescue shell; the hash lives outside the repo.
   users.mutableUsers = false;
-  users.users.root = {
-    hashedPassword = "$6$yBnXt/WqpuGmazKj$AQ70WER.zc8kXVPqkuxP2iSHArAyXhm5nzZwFB6R/AxfeB7rNrDpzAt47iwjC68wpaExGQ.j1KeLQ.OtXSCIR.";
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE3mQnGAwa871FKI/aRUyHXGUKyk9h2SyNI7ASy1t7Q0 sachs@helios"
-    ];
-  };
+  users.users.root.hashedPasswordFile = "/var/lib/secrets/password.hash";
   users.users.sachs = {
     isNormalUser = true;
     uid = 1000;
     extraGroups = [
       "wheel"
-      "video"
-      "audio"
-      "input"
       "dialout"
       "render"
     ];
-    hashedPassword = "$6$yBnXt/WqpuGmazKj$AQ70WER.zc8kXVPqkuxP2iSHArAyXhm5nzZwFB6R/AxfeB7rNrDpzAt47iwjC68wpaExGQ.j1KeLQ.OtXSCIR.";
+    hashedPasswordFile = "/var/lib/secrets/password.hash";
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE3mQnGAwa871FKI/aRUyHXGUKyk9h2SyNI7ASy1t7Q0 sachs@helios"
     ];
   };
   security.sudo.wheelNeedsPassword = false;
-
-  services.tailscale.enable = true;
-  services.tailscale.openFirewall = true;
 
   services.fstrim.enable = true;
   hardware.bluetooth.enable = true;
@@ -107,7 +103,7 @@ in
   services.speechd.enable = false;
   environment.etc."sway/config.d/blackwell.conf".text = ''
     set $term foot
-    font pango:IBM Plex Sans 10
+    font pango:sans 10
     output HDMI-A-1 pos 0 0
     output DP-1 mode 1920x1080@144Hz pos 1920 0
     output * bg /etc/sway/raptors.jpeg fill
