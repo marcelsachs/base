@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  lib,
   ...
 }:
 let
@@ -18,27 +19,15 @@ in
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.timeout = 0;
   boot.kernelPackages = pkgs.linuxPackages_latest;
-
-  boot.blacklistedKernelModules = [
-    "nouveau"
-    "simpledrm"
-  ];
   boot.kernelParams = [ "nowatchdog" ];
-  boot.kernelModules = [
-    "nvidia"
-    "nvidia_uvm"
-  ];
 
-  hardware.enableRedistributableFirmware = true;
   hardware.graphics.enable = true;
-  services.xserver.enable = false;
-  services.xserver.videoDrivers = [
-    "amdgpu"
-    "nvidia"
-  ];
+  # The AMD iGPU drives the monitors. The NVIDIA card is compute only: no KMS,
+  # so wlroots never sees it. videoDrivers is what activates hardware.nvidia.
+  services.xserver.videoDrivers = [ "nvidia" ];
   hardware.nvidia = {
     open = true;
-    modesetting.enable = true;
+    modesetting.enable = false;
     nvidiaSettings = false;
     nvidiaPersistenced = true;
     package = config.boot.kernelPackages.nvidiaPackages.latest;
@@ -98,25 +87,14 @@ in
     SUBSYSTEM=="tty", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="374?|375?", SYMLINK+="tty-stlink/$attr{serial}"
     SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", TAG+="uaccess", MODE="0666", SYMLINK+="stm32dfu"
     SUBSYSTEM=="tty", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", TAG+="uaccess", SYMLINK+="tty-stm32/$attr{serial}"
-    SUBSYSTEM=="drm", KERNEL=="card[0-9]", KERNELS=="0000:01:00.0", SYMLINK+="dri/nvidia-card"
   '';
 
   services.fstrim.enable = true;
   hardware.bluetooth.enable = true;
 
-  programs.sway = {
-    enable = true;
-    wrapperFeatures.gtk = true;
-    extraOptions = [ "--unsupported-gpu" ];
-    extraSessionCommands = ''
-      export WLR_NO_HARDWARE_CURSORS=1
-      export WLR_DRM_DEVICES=/dev/dri/nvidia-card
-      export GBM_BACKEND=nvidia-drm
-      export __GLX_VENDOR_LIBRARY_NAME=nvidia
-      export NIXOS_OZONE_WL=1
-      export LD_LIBRARY_PATH=/run/opengl-driver/lib
-    '';
-  };
+  programs.sway.enable = true;
+  programs.sway.wrapperFeatures.gtk = true;
+  environment.sessionVariables.NIXOS_OZONE_WL = "1";
   programs.foot = {
     enable = true;
     settings.main.font = "IBM Plex Mono:size=10";
@@ -146,37 +124,15 @@ in
     mode = "0755";
   };
 
-  environment.etc."greetd/session" = {
-    source = pkgs.writeShellScript "greetd-session" ''
-      set -euo pipefail
-      export WLR_NO_HARDWARE_CURSORS=1
-      export WLR_DRM_DEVICES=/dev/dri/nvidia-card
-      export GBM_BACKEND=nvidia-drm
-      export __GLX_VENDOR_LIBRARY_NAME=nvidia
-      export NIXOS_OZONE_WL=1
-      export LD_LIBRARY_PATH=/run/opengl-driver/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
-      exec ${config.programs.sway.package}/bin/sway
-    '';
-    mode = "0755";
-  };
   environment.etc."sway/raptors.jpeg".source = ./raptors.jpeg;
 
   services.greetd = {
     enable = true;
-    useTextGreeter = false;
-    settings = {
-      initial_session = {
-        command = "/etc/greetd/session";
-        user = "sachs";
-      };
-      default_session = {
-        command = "/etc/greetd/session";
-        user = "sachs";
-      };
+    settings.default_session = {
+      command = lib.getExe config.programs.sway.package;
+      user = "sachs";
     };
   };
-  systemd.services.greetd.restartIfChanged = false;
-  systemd.services.greetd.stopIfChanged = false;
   services.speechd.enable = false;
   services.xserver.xkb.layout = "de";
   services.xserver.xkb.variant = "neo_qwertz";
