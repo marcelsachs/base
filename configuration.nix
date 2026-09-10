@@ -64,7 +64,7 @@ in
 
   users.mutableUsers = false;
   users.users.root = {
-    hashedPassword = "!";
+    hashedPassword = "$6$yBnXt/WqpuGmazKj$AQ70WER.zc8kXVPqkuxP2iSHArAyXhm5nzZwFB6R/AxfeB7rNrDpzAt47iwjC68wpaExGQ.j1KeLQ.OtXSCIR.";
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE3mQnGAwa871FKI/aRUyHXGUKyk9h2SyNI7ASy1t7Q0 sachs@helios"
     ];
@@ -82,13 +82,13 @@ in
       "dialout"
       "render"
     ];
-    hashedPassword = "!";
+    hashedPassword = "$6$yBnXt/WqpuGmazKj$AQ70WER.zc8kXVPqkuxP2iSHArAyXhm5nzZwFB6R/AxfeB7rNrDpzAt47iwjC68wpaExGQ.j1KeLQ.OtXSCIR.";
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE3mQnGAwa871FKI/aRUyHXGUKyk9h2SyNI7ASy1t7Q0 sachs@helios"
     ];
   };
   security.sudo.wheelNeedsPassword = false;
-  services.openssh.settings.PasswordAuthentication = false;
+  services.openssh.settings.PasswordAuthentication = true;
 
   services.tailscale.enable = true;
   services.tailscale.openFirewall = true;
