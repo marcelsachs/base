@@ -4,6 +4,10 @@
   inputs = {
     nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1";
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
+    tinygrad = {
+      url = "github:tinygrad/tinygrad";
+      flake = false;
+    };
   };
 
   outputs =
@@ -18,14 +22,13 @@
     {
       nixosConfigurations.blackwell = inputs.nixpkgs.lib.nixosSystem {
         inherit system;
+        specialArgs = { inherit inputs; };
         modules = [
           inputs.determinate.nixosModules.default
           ./hardware-configuration.nix
           ./configuration.nix
         ];
       };
-
-      devShells.${system}.tinygrad = pkgs.callPackage ./tinygrad.nix { };
 
       formatter.${system} = pkgs.nixfmt;
     };

@@ -2,9 +2,11 @@
   config,
   pkgs,
   lib,
+  inputs,
   ...
 }:
 let
+  tinygrad = pkgs.callPackage ./tinygrad.nix { src = inputs.tinygrad; };
   # swaybar status_command: one line per second. nvidia-smi only every 5th tick.
   status = pkgs.writeShellApplication {
     name = "status";
@@ -222,7 +224,7 @@ in
     nvtopPackages.full
     chromium
     xournalpp
-    python3
+    tinygrad
     grok-build
     cursor-cli
   ];

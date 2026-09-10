@@ -214,7 +214,24 @@
     "root": {
       "inputs": {
         "determinate": "determinate",
-        "nixpkgs": "nixpkgs_3"
+        "nixpkgs": "nixpkgs_3",
+        "tinygrad": "tinygrad"
+      }
+    },
+    "tinygrad": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1789060699,
+        "narHash": "sha256-y9VC7TFi2amUAZbf5eHeAxTFMZExVGCW5y2uFXdydwk=",
+        "owner": "tinygrad",
+        "repo": "tinygrad",
+        "rev": "ce9a1b96c1e4967ae52fcfdc9972999cd5029837",
+        "type": "github"
+      },
+      "original": {
+        "owner": "tinygrad",
+        "repo": "tinygrad",
+        "type": "github"
       }
     }
   },
