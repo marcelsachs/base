@@ -5,6 +5,13 @@
   unzip,
   python3,
   makeWrapper,
+  autoPatchelfHook,
+  libusb1,
+  zlib,
+  zstd,
+  glib,
+  krb5,
+  brotli,
 }:
 
 stdenv.mkDerivation rec {
@@ -17,8 +24,8 @@ stdenv.mkDerivation rec {
     url = "https://www.st.com/en/development-tools/stm32cubeprog.html";
     message = ''
       ST CubeProgrammer ${version} zip is not in the Nix store.
-      Mount Ventoy UUID FBDE-EAD7, then:
-      nix-prefetch-url file:///mnt/st/SetupSTM32CubeProgrammer_linux_64.zip
+      Mount Ventoy, then:
+      nix-prefetch-url file:///usb/st/SetupSTM32CubeProgrammer_linux_64.zip
     '';
   };
 
@@ -26,6 +33,16 @@ stdenv.mkDerivation rec {
     unzip
     python3
     makeWrapper
+    autoPatchelfHook
+  ];
+  buildInputs = [
+    stdenv.cc.cc
+    libusb1
+    zlib
+    zstd
+    glib
+    krb5
+    brotli
   ];
 
   dontUnpack = true;
@@ -37,6 +54,7 @@ stdenv.mkDerivation rec {
     unzip -q "$src" SetupSTM32CubeProgrammer-${version}.exe
     python3 ${./izpack-unpack.py} SetupSTM32CubeProgrammer-${version}.exe ${./progr-pack.json} "$out"
     mkdir -p "$out/bin"
+    addAutoPatchelfSearchPath "$out/lib"
     makeWrapper "$out/bin/STM32_Programmer_CLI" "$out/bin/stprogr" \
       --set STM32_PRG_PATH "$out/bin" \
       --prefix LD_LIBRARY_PATH : "$out/lib"
