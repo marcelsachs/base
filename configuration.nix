@@ -34,6 +34,11 @@ in
     package = config.boot.kernelPackages.nvidiaPackages.latest;
   };
   nixpkgs.config.allowUnfree = true;
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 30d";
+  };
 
   networking.useNetworkd = true;
   networking.wireless.iwd.enable = true;
