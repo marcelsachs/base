@@ -84,7 +84,6 @@ in
     source = ./sway/status;
     mode = "0755";
   };
-  environment.etc."sway/raptors.jpeg".source = ./raptors.jpeg;
 
   services.greetd = {
     enable = true;
@@ -99,7 +98,7 @@ in
     font pango:sans 10
     output HDMI-A-1 pos 0 0
     output DP-1 mode 1920x1080@144Hz pos 1920 0
-    output * bg /etc/sway/raptors.jpeg fill
+    output * bg ~/.config/sway/bg fill
     bar bar-0 {
         position bottom
         status_command /etc/sway/status
