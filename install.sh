@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Run from the Determinate NixOS live ISO, as root:
-#   mkdir -p /mnt/usb
-#   mount /dev/disk/by-uuid/FBDE-EAD7 /mnt/usb
-#   bash /mnt/usb/nix/install.sh
+#   mkdir -p /usb
+#   mount /dev/disk/by-uuid/FBDE-EAD7 /usb
+#   bash /usb/nix/install.sh
 #
 # Both Ventoy labels are "Ventoy". 32GB is FBDE-EAD7. 500GB is 2680-E05F.
 #
@@ -15,6 +15,7 @@ set -euo pipefail
 
 DISK=/dev/nvme0n1
 HERE=$(cd "$(dirname "$0")" && pwd)
+[[ $HERE == /usb/nix ]] || { echo "mount usb at /usb" >&2; exit 1; }
 STDIR=$(cd "$HERE/../st" && pwd)
 CUBE="$STDIR/SetupSTM32CubeProgrammer_linux_64.zip"
 EDGE="$STDIR/stedgeai-linux-offline"
@@ -35,6 +36,7 @@ mount --mkdir "${DISK}p1" /mnt/boot
 
 mkdir -p /mnt/etc/nixos
 cp -a "$HERE"/. /mnt/etc/nixos/
+rm -rf /mnt/etc/nixos/.git
 chmod -R u+w /mnt/etc/nixos
 
 echo "st: add vendor blobs to /mnt store"
