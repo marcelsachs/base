@@ -69,6 +69,8 @@ in
 
   programs.sway.enable = true;
   programs.sway.wrapperFeatures.gtk = true;
+  # sway nags whenever the nvidia module is loaded, regardless of which GPU renders.
+  programs.sway.extraOptions = [ "--unsupported-gpu" ];
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
   programs.foot = {
     enable = true;
