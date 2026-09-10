@@ -98,8 +98,8 @@ in
   environment.etc."sway/config.d/blackwell.conf".text = ''
     set $term foot
     font pango:sans 10
-    output HDMI-A-1 pos 0 0
-    output DP-1 mode 1920x1080@144Hz pos 1920 0
+    output "Dell Inc. SE2417HGX 0x30594A42" pos 0 0
+    output "Acer Technologies Acer XF240H 0x6040511D" mode 1920x1080@144Hz pos 1920 0
     output * bg ~/.config/sway/bg fill
     bar bar-0 {
         position bottom
@@ -117,7 +117,7 @@ in
         xkb_variant neo_qwertz
     }
     input type:tablet_tool {
-        map_to_output DP-1
+        map_to_output "Acer Technologies Acer XF240H 0x6040511D"
     }
   '';
 
