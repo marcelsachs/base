@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+SECONDS=0
 [[ $(id -u) -eq 0 ]] || { echo "run as root" >&2; exit 1; }
 
 DISK=/dev/nvme0n1
@@ -43,4 +44,4 @@ install -d -m 700 -o 1000 -g 100 /mnt/sachs/.ssh
 install -m 600 -o 1000 -g 100 "$KEY" /mnt/sachs/.ssh/id_ed25519
 install -m 644 -o 1000 -g 100 "$KEY.pub" /mnt/sachs/.ssh/id_ed25519.pub
 
-echo "installed. reboot. sway."
+echo $SECONDS
