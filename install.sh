@@ -13,6 +13,7 @@ KEY="$HERE/../secrets/id_ed25519"
 [[ -f $CUBE ]] || { echo "st: missing $CUBE" >&2; exit 1; }
 [[ -f $EDGE ]] || { echo "st: missing $EDGE" >&2; exit 1; }
 [[ -f $KEY ]] || { echo "secrets: missing $KEY" >&2; exit 1; }
+[[ -d $HERE/.git ]] || { echo "nix: $HERE is not a git checkout" >&2; exit 1; }
 
 sgdisk -Z "$DISK"
 sgdisk -n 1:0:+1G -t 1:ef00 -c 1:boot -n 2:0:0 -t 2:8304 -c 2:nixos "$DISK"
@@ -27,8 +28,6 @@ mount -o fmask=0077,dmask=0077 --mkdir "${DISK}p1" /mnt/boot
 
 mkdir -p /mnt/etc/nixos
 cp -a "$HERE"/. /mnt/etc/nixos/
-rm -rf /mnt/etc/nixos/.git
-chmod -R u+w /mnt/etc/nixos
 
 echo "st: add vendor blobs to /mnt store"
 nix --extra-experimental-features nix-command --store /mnt \
@@ -40,6 +39,7 @@ nixos-install --no-root-passwd --flake /mnt/etc/nixos#blackwell \
   --option extra-substituters https://install.determinate.systems \
   --option extra-trusted-public-keys cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM=
 
+chown -R 1000:100 /mnt/etc/nixos
 install -d -m 700 -o 1000 -g 100 /mnt/sachs/.ssh
 install -m 600 -o 1000 -g 100 "$KEY" /mnt/sachs/.ssh/id_ed25519
 install -m 644 -o 1000 -g 100 "$KEY.pub" /mnt/sachs/.ssh/id_ed25519.pub

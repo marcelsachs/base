@@ -202,7 +202,6 @@ in
 
   systemd.tmpfiles.rules = [
     "d /downloads 0775 sachs wheel -"
-    "z /etc/nixos 0775 sachs wheel -"
     "r /home"
   ];
 
