@@ -5,10 +5,10 @@ A reinstall is only for testing `install.sh`.
 
 ## Reinstall
 
-The stick installs the commit it has, so update it first:
+The stick installs the commit it has, so give it this machine's commit first:
 
 ```
-sudo mount -o uid=1000,gid=100 /dev/sda1 /usb && git -C /usb/nix pull && sudo umount /usb
+sudo mount /dev/sda1 /usb && sudo /etc/nixos/stick.sh && sudo umount /usb
 ```
 
 Boot `ISO/nixos-with-determinate.iso`, then:
