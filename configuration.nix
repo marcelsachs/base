@@ -104,6 +104,10 @@ in
   services.fstrim.enable = true;
   hardware.bluetooth.enable = true;
 
+  # Tablet: kernel HID + libinput. libwacom udev groups pad+pen.
+  services.libinput.enable = true;
+  services.udev.packages = [ pkgs.libwacom ];
+
   programs.sway = {
     enable = true;
     wrapperFeatures.gtk = true;
@@ -194,6 +198,12 @@ in
     input type:keyboard {
         xkb_layout de
         xkb_variant neo_qwertz
+    }
+    input type:tablet_tool {
+        map_to_output DP-1
+    }
+    input type:tablet_pad {
+        map_to_output DP-1
     }
   '';
 
@@ -289,6 +299,7 @@ in
     wget
     pciutils
     usbutils
+    libinput
     file
     poppler-utils
     ripgrep
