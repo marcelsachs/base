@@ -11,13 +11,12 @@ Stick layout, checked by `install.sh`:
 ```
 nix/                      this checkout
 st/                       SetupSTM32CubeProgrammer_linux_64.zip, stedgeai-linux-offline
-secrets/                  id_ed25519, id_ed25519.pub, password.hash, tailscale.key, cache.key
+secrets/                  id_ed25519, id_ed25519.pub, password.hash, tailscale.key
 home/.config/sway/bg      wallpaper
-cache/                    optional: signed binary cache written by stick.sh
 ```
 
-`install.sh` installs the commit on the stick. Before a reinstall, make the stick
-match the machine (checkout, cache, key):
+`install.sh` installs the commit on the stick. Before a reinstall, put the machine's
+commit there:
 
 ```
 sudo mount /dev/sda1 /usb && sudo /etc/nixos/stick.sh && sudo umount /usb
