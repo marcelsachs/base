@@ -3,7 +3,6 @@
   stdenv,
   requireFile,
   makeWrapper,
-  autoPatchelfHook,
   zlib,
   zstd,
   bzip2,
@@ -43,7 +42,6 @@ stdenv.mkDerivation rec {
   nativeBuildInputs = [
     makeWrapper
     stdenv.cc.bintools
-    autoPatchelfHook
   ];
   buildInputs = [
     zlib
@@ -109,11 +107,12 @@ stdenv.mkDerivation rec {
       --root $out \
       install stedgeai0400.stm32mcu
     mkdir -p $out/bin
-    addAutoPatchelfSearchPath $out/4.0/Utilities/linux
-    addAutoPatchelfSearchPath $out/4.0/Utilities/linux/lib
-    makeWrapper $out/4.0/Utilities/linux/stedgeai $out/bin/stedgeai \
+    makeWrapper ${stdenv.cc.bintools.dynamicLinker} $out/bin/stedgeai \
+      --argv0 stedgeai \
+      --add-flags $out/4.0/Utilities/linux/stedgeai \
       --set ST_EDGEAI $out/4.0 \
-      --prefix PATH : $out/4.0/Utilities/linux
+      --prefix PATH : $out/4.0/Utilities/linux \
+      --prefix LD_LIBRARY_PATH : $out/4.0/Utilities/linux/lib
     runHook postInstall
   '';
 

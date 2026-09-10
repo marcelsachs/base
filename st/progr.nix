@@ -5,7 +5,6 @@
   unzip,
   python3,
   makeWrapper,
-  autoPatchelfHook,
   libusb1,
   zlib,
   zstd,
@@ -33,7 +32,6 @@ stdenv.mkDerivation rec {
     unzip
     python3
     makeWrapper
-    autoPatchelfHook
   ];
   buildInputs = [
     stdenv.cc.cc
@@ -54,11 +52,12 @@ stdenv.mkDerivation rec {
     unzip -q "$src" SetupSTM32CubeProgrammer-${version}.exe
     python3 ${./izpack-unpack.py} SetupSTM32CubeProgrammer-${version}.exe ${./progr-pack.json} "$out"
     mkdir -p "$out/bin"
-    addAutoPatchelfSearchPath "$out/lib"
-    makeWrapper "$out/bin/STM32_Programmer_CLI" "$out/bin/stprogr" \
-      --set STM32_PRG_PATH "$out/bin" \
-      --prefix LD_LIBRARY_PATH : "$out/lib"
     chmod +x "$out/bin/STM32_Programmer_CLI"
+    makeWrapper ${stdenv.cc.bintools.dynamicLinker} "$out/bin/stprogr" \
+      --argv0 STM32_Programmer_CLI \
+      --add-flags "$out/bin/STM32_Programmer_CLI" \
+      --set STM32_PRG_PATH "$out/bin" \
+      --prefix LD_LIBRARY_PATH : "$out/lib:${lib.makeLibraryPath buildInputs}"
     runHook postInstall
   '';
 
