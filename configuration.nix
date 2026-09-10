@@ -195,6 +195,9 @@ in
         xkb_layout de
         xkb_variant neo_qwertz
     }
+    input type:tablet_tool {
+        map_to_output DP-1
+    }
   '';
 
   systemd.tmpfiles.rules = [
@@ -296,6 +299,7 @@ in
     nvtopPackages.full
     waybar
     chromium
+    xournalpp
     cudaPackages.cuda_nvcc
     cudaPackages.cuda_nvrtc
     cudaPackages.cuda_cudart
