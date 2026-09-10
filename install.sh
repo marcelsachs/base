@@ -2,10 +2,10 @@
 set -euo pipefail
 SECONDS=0
 [[ $(id -u) -eq 0 ]] || { echo "run as root" >&2; exit 1; }
-mountpoint -q /usb || mount --mkdir /dev/mapper/sda1 /usb
-HERE=/usb/nix
 
 DISK=/dev/nvme0n1
+HERE=$(cd "$(dirname "$0")" && pwd)
+[[ $HERE == /usb/nix ]] || { echo "mount usb at /usb" >&2; exit 1; }
 STDIR=$(cd "$HERE/../st" && pwd)
 CUBE="$STDIR/SetupSTM32CubeProgrammer_linux_64.zip"
 EDGE="$STDIR/stedgeai-linux-offline"
