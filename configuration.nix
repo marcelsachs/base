@@ -221,7 +221,6 @@ in
 
   systemd.tmpfiles.rules = [
     "d /downloads 0775 sachs wheel -"
-    "d /tinygrad 0775 sachs wheel -"
     "z /etc/nixos 0775 sachs wheel -"
   ];
 
@@ -257,7 +256,6 @@ in
       core.editor = "vim";
       safe.directory = [
         "/etc/nixos"
-        "/tinygrad"
       ];
     };
   };
@@ -283,10 +281,6 @@ in
   environment.variables.BROWSER = "chromium";
   environment.variables.DL = "/downloads";
   environment.variables.XDG_DOWNLOAD_DIR = "/downloads";
-  environment.variables.TINYGRAD = "/tinygrad";
-  environment.variables.CUDA_PATH = "${pkgs.cudaPackages.cuda_cudart}";
-  environment.variables.NVRTC_PATH = "${pkgs.cudaPackages.cuda_nvrtc.lib}/lib/libnvrtc.so";
-  environment.variables.NVJITLINK_PATH = "${pkgs.cudaPackages.libnvjitlink.lib}/lib/libnvJitLink.so";
   xdg.mime.defaultApplications = {
     "text/html" = "chromium-browser.desktop";
     "x-scheme-handler/http" = "chromium-browser.desktop";
@@ -322,10 +316,6 @@ in
     waybar
     bubblewrap
     chromium
-    cudaPackages.cuda_nvcc
-    cudaPackages.cuda_nvrtc
-    cudaPackages.cuda_cudart
-    cudaPackages.libnvjitlink
     (python3.withPackages (
       ps: with ps; [
         pip
