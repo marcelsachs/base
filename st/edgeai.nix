@@ -111,8 +111,7 @@ stdenv.mkDerivation rec {
       --argv0 stedgeai \
       --add-flags $out/4.0/Utilities/linux/stedgeai \
       --set ST_EDGEAI $out/4.0 \
-      --prefix PATH : $out/4.0/Utilities/linux \
-      --prefix LD_LIBRARY_PATH : $out/4.0/Utilities/linux/lib
+      --prefix PATH : $out/4.0/Utilities/linux
     runHook postInstall
   '';
 
