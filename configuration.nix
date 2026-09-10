@@ -195,7 +195,6 @@ in
         xkb_layout de
         xkb_variant neo_qwertz
     }
-    exec foot
   '';
 
   programs.nix-ld.enable = true;
@@ -315,7 +314,6 @@ in
     wl-clipboard
     nvtopPackages.full
     waybar
-    bubblewrap
     chromium
     cudaPackages.cuda_nvcc
     cudaPackages.cuda_nvrtc
