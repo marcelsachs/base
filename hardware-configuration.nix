@@ -1,5 +1,3 @@
-# Labels: mkfs.fat -F32 -n boot; mkfs.ext4 -L nixos.
-# nodiscard: Nixd GC + online discard starve the disk.
 {
   config,
   lib,
