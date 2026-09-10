@@ -23,6 +23,7 @@ CACHE=$(cd "$HERE/.." && pwd)/cache
 [[ -f $CK ]] || { echo "secrets: missing $CK (nix key generate-secret --key-name blackwell > $CK)" >&2; exit 1; }
 [[ -f $BG ]] || { echo "home: missing $BG (the wallpaper)" >&2; exit 1; }
 [[ -d $HERE/.git ]] || { echo "nix: $HERE is not a git checkout" >&2; exit 1; }
+echo "nix: installing commit $(tail -1 "$HERE/.git/logs/HEAD" | cut -c42-48) (stick.sh keeps it current)"
 
 sgdisk -Z "$DISK"
 sgdisk -n 1:0:+1G -t 1:ef00 -c 1:boot -n 2:0:0 -t 2:8304 -c 2:nixos "$DISK"

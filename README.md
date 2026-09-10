@@ -13,11 +13,12 @@ nix/                      this checkout
 st/                       SetupSTM32CubeProgrammer_linux_64.zip, stedgeai-linux-offline
 secrets/                  id_ed25519, id_ed25519.pub, password.hash, tailscale.key, cache.key
 home/.config/sway/bg      wallpaper
-cache/                    optional: signed binary cache written by cache.sh
+cache/                    optional: signed binary cache written by stick.sh
 ```
 
-On the machine, after a rebuild worth keeping offline:
+`install.sh` installs the commit on the stick. Before a reinstall, make the stick
+match the machine (checkout, cache, key):
 
 ```
-sudo mount /dev/sda1 /usb && sudo /etc/nixos/cache.sh && sudo umount /usb
+sudo mount /dev/sda1 /usb && sudo /etc/nixos/stick.sh && sudo umount /usb
 ```
