@@ -11,10 +11,12 @@ CUBE="$STDIR/SetupSTM32CubeProgrammer_linux_64.zip"
 EDGE="$STDIR/stedgeai-linux-offline"
 KEY="$HERE/../secrets/id_ed25519"
 PW="$HERE/../secrets/password.hash"
+BG="$HERE/../home/.config/sway/bg"
 [[ -f $CUBE ]] || { echo "st: missing $CUBE" >&2; exit 1; }
 [[ -f $EDGE ]] || { echo "st: missing $EDGE" >&2; exit 1; }
 [[ -f $KEY ]] || { echo "secrets: missing $KEY" >&2; exit 1; }
 [[ -f $PW ]] || { echo "secrets: missing $PW (mkpasswd -m sha-512 > $PW)" >&2; exit 1; }
+[[ -f $BG ]] || { echo "home: missing $BG (the wallpaper)" >&2; exit 1; }
 [[ -d $HERE/.git ]] || { echo "nix: $HERE is not a git checkout" >&2; exit 1; }
 
 sgdisk -Z "$DISK"
@@ -42,9 +44,10 @@ nixos-install --no-root-passwd --flake /mnt/etc/nixos#blackwell \
   --option extra-substituters https://install.determinate.systems \
   --option extra-trusted-public-keys cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM=
 
-chown -R 1000:100 /mnt/etc/nixos
-install -d -m 700 -o 1000 -g 100 /mnt/home/sachs/.ssh
-install -m 600 -o 1000 -g 100 "$KEY" /mnt/home/sachs/.ssh/id_ed25519
-install -m 644 -o 1000 -g 100 "$KEY.pub" /mnt/home/sachs/.ssh/id_ed25519.pub
+install -d -m 700 /mnt/home/sachs/.ssh
+install -m 600 "$KEY" /mnt/home/sachs/.ssh/id_ed25519
+install -m 644 "$KEY.pub" /mnt/home/sachs/.ssh/id_ed25519.pub
+install -D -m 644 "$BG" /mnt/home/sachs/.config/sway/bg
+chown -R 1000:100 /mnt/etc/nixos /mnt/home/sachs
 
 echo $SECONDS
