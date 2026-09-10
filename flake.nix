@@ -10,6 +10,10 @@
     { self, ... }@inputs:
     let
       system = "x86_64-linux";
+      pkgs = import inputs.nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+      };
     in
     {
       nixosConfigurations.blackwell = inputs.nixpkgs.lib.nixosSystem {
@@ -21,6 +25,8 @@
         ];
       };
 
-      formatter.${system} = inputs.nixpkgs.legacyPackages.${system}.nixfmt;
+      devShells.${system}.tinygrad = pkgs.callPackage ./tinygrad.nix { };
+
+      formatter.${system} = pkgs.nixfmt;
     };
 }

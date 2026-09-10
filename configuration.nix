@@ -197,9 +197,6 @@ in
 
   environment.variables.EDITOR = "vim";
   environment.variables.BROWSER = "chromium";
-  environment.variables.CUDA_PATH = "${pkgs.cudaPackages.cuda_cudart}";
-  environment.variables.NVRTC_PATH = "${pkgs.cudaPackages.cuda_nvrtc.lib}/lib/libnvrtc.so";
-  environment.variables.NVJITLINK_PATH = "${pkgs.cudaPackages.libnvjitlink.lib}/lib/libnvJitLink.so";
   xdg.mime.defaultApplications = {
     "text/html" = "chromium-browser.desktop";
     "x-scheme-handler/http" = "chromium-browser.desktop";
@@ -235,17 +232,7 @@ in
     waybar
     chromium
     xournalpp
-    cudaPackages.cuda_nvcc
-    cudaPackages.cuda_nvrtc
-    cudaPackages.cuda_cudart
-    cudaPackages.libnvjitlink
-    (python3.withPackages (
-      ps: with ps; [
-        pip
-        setuptools
-        wheel
-      ]
-    ))
+    python3
   ];
 
   system.stateVersion = "26.05";
