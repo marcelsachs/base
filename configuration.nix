@@ -61,7 +61,6 @@ in
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE3mQnGAwa871FKI/aRUyHXGUKyk9h2SyNI7ASy1t7Q0 sachs@helios"
     ];
   };
-  security.sudo.wheelNeedsPassword = false;
 
   services.fstrim.enable = true;
   hardware.bluetooth.enable = true;
