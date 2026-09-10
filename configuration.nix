@@ -22,8 +22,6 @@ in
   systemd.settings.Manager.RuntimeWatchdogSec = "30s";
 
   hardware.graphics.enable = true;
-  # The AMD iGPU drives the monitors. The NVIDIA card is compute only: no KMS,
-  # so wlroots never sees it. videoDrivers is what activates hardware.nvidia.
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.nvidia = {
     open = true;
