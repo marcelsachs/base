@@ -111,6 +111,7 @@ stdenv.mkDerivation rec {
       --argv0 stedgeai \
       --add-flags $out/4.0/Utilities/linux/stedgeai \
       --set ST_EDGEAI $out/4.0 \
+      --set PYTHONHOME $out/4.0/Utilities/linux \
       --prefix PATH : $out/4.0/Utilities/linux
     runHook postInstall
   '';
