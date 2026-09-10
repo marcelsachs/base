@@ -76,7 +76,7 @@ in
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
   programs.foot = {
     enable = true;
-    settings.main.font = "IBM Plex Mono:size=10";
+    settings.main.font = "monospace:size=10";
   };
   fonts.packages = [ pkgs.ibm-plex ];
   fonts.fontconfig.defaultFonts = {
@@ -84,14 +84,6 @@ in
     serif = [ "IBM Plex Serif" ];
     monospace = [ "IBM Plex Mono" ];
   };
-  environment.etc."xdg/gtk-3.0/settings.ini".text = ''
-    [Settings]
-    gtk-font-name=IBM Plex Sans 10
-  '';
-  environment.etc."xdg/gtk-4.0/settings.ini".text = ''
-    [Settings]
-    gtk-font-name=IBM Plex Sans 10
-  '';
   environment.etc."xdg/waybar/config.jsonc".source = ./waybar/config.jsonc;
   environment.etc."xdg/waybar/style.css".source = ./waybar/style.css;
   environment.etc."xdg/waybar/tailscale" = {
