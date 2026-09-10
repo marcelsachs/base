@@ -27,6 +27,13 @@
 
       devShells.${system}.tinygrad = pkgs.callPackage ./tinygrad.nix { };
 
+      # nix build /etc/nixos#NAME builds one of these alone, without the system.
+      packages.${system} = {
+        stprogr = pkgs.callPackage ./st/progr.nix { };
+        stedgeai = pkgs.callPackage ./st/edgeai.nix { };
+        stedgeai-patchelf = pkgs.callPackage ./st/edgeai-patchelf.nix { };
+      };
+
       formatter.${system} = pkgs.nixfmt;
     };
 }
