@@ -61,8 +61,6 @@ in
   users.users.sachs = {
     isNormalUser = true;
     uid = 1000;
-    group = "users";
-    home = "/sachs";
     extraGroups = [
       "wheel"
       "video"
@@ -156,22 +154,6 @@ in
     }
   '';
 
-  systemd.tmpfiles.rules = [
-    "d /downloads 0775 sachs wheel -"
-    "r /home"
-  ];
-
-  environment.etc."tmpfiles.d/home.conf".text = pkgs.lib.mkForce ''
-    r /home
-  '';
-
-  programs.chromium.enable = true;
-  programs.chromium.extraOpts = {
-    DownloadDirectory = "/downloads";
-    DefaultDownloadDirectory = "/downloads";
-    PromptForDownloadLocation = false;
-  };
-
   programs.direnv.enable = true;
   programs.direnv.nix-direnv.enable = true;
   programs.direnv.enableBashIntegration = true;
@@ -215,8 +197,6 @@ in
 
   environment.variables.EDITOR = "vim";
   environment.variables.BROWSER = "chromium";
-  environment.variables.DL = "/downloads";
-  environment.variables.XDG_DOWNLOAD_DIR = "/downloads";
   environment.variables.CUDA_PATH = "${pkgs.cudaPackages.cuda_cudart}";
   environment.variables.NVRTC_PATH = "${pkgs.cudaPackages.cuda_nvrtc.lib}/lib/libnvrtc.so";
   environment.variables.NVJITLINK_PATH = "${pkgs.cudaPackages.libnvjitlink.lib}/lib/libnvJitLink.so";

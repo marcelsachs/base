@@ -40,9 +40,8 @@ nixos-install --no-root-passwd --flake /mnt/etc/nixos#blackwell \
   --option extra-trusted-public-keys cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM=
 
 chown -R 1000:100 /mnt/etc/nixos
-install -d -m 700 -o 1000 -g 100 /mnt/sachs/.ssh
-install -m 600 -o 1000 -g 100 "$KEY" /mnt/sachs/.ssh/id_ed25519
-install -m 644 -o 1000 -g 100 "$KEY.pub" /mnt/sachs/.ssh/id_ed25519.pub
-rmdir /mnt/home 2>/dev/null || true
+install -d -m 700 -o 1000 -g 100 /mnt/home/sachs/.ssh
+install -m 600 -o 1000 -g 100 "$KEY" /mnt/home/sachs/.ssh/id_ed25519
+install -m 644 -o 1000 -g 100 "$KEY.pub" /mnt/home/sachs/.ssh/id_ed25519.pub
 
 echo $SECONDS
