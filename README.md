@@ -9,5 +9,5 @@ sudo bash -c 'mkdir -p /usb && mount /dev/mapper/sda1 /usb && bash /usb/nix/inst
 ```
 
 ```
-sudo git -c safe.directory='*' -C /usb/nix pull --ff-only /etc/nixos master
+sudo git -c safe.directory='*' -C /usb/nix fetch -q /etc/nixos master && sudo git -c safe.directory='*' -C /usb/nix reset -q --hard FETCH_HEAD
 ```
