@@ -19,7 +19,6 @@ in
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.timeout = 3;
   boot.kernelPackages = pkgs.linuxPackages_latest;
-  # Hardware watchdog: a hard hang becomes a reboot instead of a trip to the machine.
   systemd.settings.Manager.RuntimeWatchdogSec = "30s";
 
   hardware.graphics.enable = true;
@@ -43,17 +42,14 @@ in
   networking.useNetworkd = true;
   networking.wireless.iwd.enable = true;
 
-  # SSH: keys only, reachable only over the tailnet. Root is reached via sudo.
   services.openssh.enable = true;
   services.openssh.openFirewall = false;
   services.openssh.settings.PasswordAuthentication = false;
   networking.firewall.trustedInterfaces = [ "tailscale0" ];
   services.tailscale.enable = true;
   services.tailscale.openFirewall = true;
-  # Joins the tailnet on first boot; the key is only read while the node needs login.
   services.tailscale.authKeyFile = "/var/lib/secrets/tailscale.key";
 
-  # One password for console and rescue shell; the hash lives outside the repo.
   users.mutableUsers = false;
   users.users.root.hashedPasswordFile = "/var/lib/secrets/password.hash";
   users.users.sachs = {
@@ -75,7 +71,6 @@ in
 
   programs.sway.enable = true;
   programs.sway.wrapperFeatures.gtk = true;
-  # sway nags whenever the nvidia module is loaded, regardless of which GPU renders.
   programs.sway.extraOptions = [ "--unsupported-gpu" ];
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
   programs.foot = {
