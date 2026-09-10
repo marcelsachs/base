@@ -33,22 +33,11 @@ in
     package = config.boot.kernelPackages.nvidiaPackages.latest;
   };
   nixpkgs.config.allowUnfree = true;
-  nix.settings.trusted-users = [
-    "root"
-    "@wheel"
-  ];
 
   networking.useNetworkd = true;
   networking.wireless.iwd.enable = true;
-  systemd.network.enable = true;
-  systemd.network.networks."20-wired" = {
-    matchConfig.Name = "en*";
-    networkConfig.DHCP = "yes";
-  };
 
   services.openssh.enable = true;
-  services.openssh.settings.PermitRootLogin = "prohibit-password";
-  services.openssh.settings.PrintMotd = false;
   services.openssh.settings.PrintLastLog = false;
 
   users.mutableUsers = false;
@@ -75,17 +64,9 @@ in
     ];
   };
   security.sudo.wheelNeedsPassword = false;
-  services.openssh.settings.PasswordAuthentication = true;
 
   services.tailscale.enable = true;
   services.tailscale.openFirewall = true;
-
-  services.udev.extraRules = ''
-    SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="374?|375?", TAG+="uaccess", MODE="0666", SYMLINK+="stlink/$attr{serial}"
-    SUBSYSTEM=="tty", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="374?|375?", SYMLINK+="tty-stlink/$attr{serial}"
-    SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", TAG+="uaccess", MODE="0666", SYMLINK+="stm32dfu"
-    SUBSYSTEM=="tty", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", TAG+="uaccess", SYMLINK+="tty-stm32/$attr{serial}"
-  '';
 
   services.fstrim.enable = true;
   hardware.bluetooth.enable = true;
@@ -132,8 +113,6 @@ in
     };
   };
   services.speechd.enable = false;
-  services.xserver.xkb.layout = "de";
-  services.xserver.xkb.variant = "neo_qwertz";
   environment.etc."sway/config.d/blackwell.conf".text = ''
     set $term foot
     font pango:IBM Plex Sans 10
@@ -171,7 +150,6 @@ in
     lfs.enable = true;
     config = {
       init.defaultBranch = "master";
-      core.editor = "vim";
       safe.directory = [
         "/etc/nixos"
       ];
@@ -189,7 +167,6 @@ in
     set tabstop=4
     syntax on
 
-    set clipboard=unnamedplus
     autocmd TextYankPost * if v:event.operator ==# 'y'
           \ | call system("wl-copy", join(v:event.regcontents, "\n"))
           \ | endif
@@ -197,13 +174,7 @@ in
 
   environment.variables.EDITOR = "vim";
   environment.variables.BROWSER = "chromium";
-  xdg.mime.defaultApplications = {
-    "text/html" = "chromium-browser.desktop";
-    "x-scheme-handler/http" = "chromium-browser.desktop";
-    "x-scheme-handler/https" = "chromium-browser.desktop";
-  };
   environment.variables.NIX_SHELL_PRESERVE_PROMPT = "1";
-  programs.bash.completion.enable = true;
   environment.interactiveShellInit = ''
     PS1='\[\033[1;38;5;39m\]\w \[\033[1;38;5;226m\]$ \[\033[0m\]'
     HISTSIZE=50000
@@ -220,8 +191,6 @@ in
     vim
     gh
     ranger
-    curl
-    wget
     pciutils
     usbutils
     file
