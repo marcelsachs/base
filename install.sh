@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Run from the Determinate NixOS live ISO, as root:
 #   mkdir -p /usb
-#   mount /dev/disk/by-uuid/FBDE-EAD7 /usb
+#   mount -t exfat /dev/mapper/sda1 /usb
 #   bash /usb/nix/install.sh
 #
 # Both Ventoy labels are "Ventoy". 32GB is FBDE-EAD7. 500GB is 2680-E05F.
