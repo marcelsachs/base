@@ -41,7 +41,6 @@ in
   services.openssh.enable = true;
   services.openssh.openFirewall = false;
   services.openssh.settings.PasswordAuthentication = false;
-  services.openssh.settings.PrintLastLog = false;
   networking.firewall.trustedInterfaces = [ "tailscale0" ];
   services.tailscale.enable = true;
   services.tailscale.openFirewall = true;
