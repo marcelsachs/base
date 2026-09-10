@@ -19,7 +19,8 @@ in
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.timeout = 3;
   boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.kernelParams = [ "nowatchdog" ];
+  # Hardware watchdog: a hard hang becomes a reboot instead of a trip to the machine.
+  systemd.settings.Manager.RuntimeWatchdogSec = "30s";
 
   hardware.graphics.enable = true;
   # The AMD iGPU drives the monitors. The NVIDIA card is compute only: no KMS,
