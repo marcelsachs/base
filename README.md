@@ -1,9 +1,7 @@
 # base
 
-NixOS. Hostname `blackwell`. Seat `sachs` HOME=/sachs. Root is rebuild and SSH.
+Boot `ISO/nixos-with-determinate.iso`.
 
-    nixos-rebuild switch --flake /etc/nixos#blackwell
-
-`stprogr` CubeProgrammer 2.23.0. `stedgeai` Edge AI Core 4.0.1.
-
-`docs/install.md`
+```
+sudo bash -c 'mkdir -p /usb && mount /dev/mapper/sda1 /usb && bash /usb/nix/install.sh'
+```

@@ -1,7 +1,0 @@
-# Boards on this workstation. Two USB ports, two ST-LINKs. n6 -b NAME.
-#   NAME  PROBE_SERIAL  CHIP  [CONNECT]
-# OpenMV N6: STLINK-V3MINIE on J8. USB 0483:3754. Probed 2026-09-03, Device ID 0x486.
-openmv      003E00333433510E37363934  stm32n657
-openmv-dfu  -                         stm32n657  port=USB1
-# NUCLEO-N657X0-Q: onboard STLINK-V3EC CN10. USB 0483:3754. UM3417 §7.3.
-nucleo      003300243234510337333934  stm32n657
