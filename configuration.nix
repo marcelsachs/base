@@ -197,26 +197,6 @@ in
     }
   '';
 
-  programs.nix-ld.enable = true;
-  programs.nix-ld.libraries = with pkgs; [
-    zlib
-    zstd
-    stdenv.cc.cc
-    libxml2
-    openssl
-    libusb1
-    systemd
-    glib
-    krb5
-    brotli
-    libxkbcommon
-    libx11
-    libxcb
-    libGL
-    fontconfig
-    freetype
-  ];
-
   systemd.tmpfiles.rules = [
     "d /downloads 0775 sachs wheel -"
     "z /etc/nixos 0775 sachs wheel -"
