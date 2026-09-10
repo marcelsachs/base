@@ -6,6 +6,7 @@ NixOS. Hostname `blackwell`. Seat `sachs` HOME=/sachs. Root is rebuild and SSH.
 
 ```
 /etc/nixos     this flake
+/lab           STM32N6 firmware, n6
 /drone         OpenMV N6 + PAG7936
 /sentry        Nucleo N657 + STEVAL-66GYMAI1
 /tinygrad      tinygrad + CUDA

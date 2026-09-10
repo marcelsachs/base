@@ -195,6 +195,7 @@
   ];
 
   systemd.tmpfiles.rules = [
+    "d /lab 0775 sachs wheel -"
     "d /drone 0775 sachs wheel -"
     "d /sentry 0775 sachs wheel -"
     "d /downloads 0775 sachs wheel -"
@@ -223,6 +224,7 @@
   programs.direnv.settings = {
     global.hide_env_diff = true;
     whitelist.prefix = [
+      "/lab"
       "/drone"
       "/sentry"
     ];
@@ -240,6 +242,7 @@
       init.defaultBranch = "master";
       core.editor = "vim";
       safe.directory = [
+        "/lab"
         "/drone"
         "/sentry"
         "/etc/nixos"

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# After first boot. Clones drone/sentry + git lfs pull.
+# After first boot. Clones lab/drone/sentry + git lfs pull.
 # tinygrad: clone into /tinygrad.
 set -euo pipefail
 [[ $(id -u) -ne 0 ]] || { echo "run as the seat user, not root" >&2; exit 1; }
@@ -20,8 +20,9 @@ clone_desk() {
   git -C "$dest" lfs pull
 }
 
+clone_desk /lab    git@github.com:marcelsachs/nucleo.git
 clone_desk /drone  git@github.com:marcelsachs/drone.git
 clone_desk /sentry git@github.com:marcelsachs/sentry.git
 
-chmod 2775 /drone /sentry
+chmod 2775 /lab /drone /sentry
 echo "desks cloned."

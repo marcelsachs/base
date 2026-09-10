@@ -14,4 +14,4 @@ After reboot:
 bash /etc/nixos/bootstrap.sh
 ```
 
-Clones drone/sentry + LFS. tinygrad: clone upstream into `/tinygrad`.
+Clones lab/drone/sentry + LFS. tinygrad: clone upstream into `/tinygrad`.
