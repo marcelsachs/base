@@ -19,8 +19,10 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 STDIR=$(cd "$HERE/../st" && pwd)
 CUBE="$STDIR/SetupSTM32CubeProgrammer_linux_64.zip"
 EDGE="$STDIR/stedgeai-linux-offline"
+KEY="$HERE/../secrets/id_ed25519"
 [[ -f $CUBE ]] || { echo "st: missing $CUBE" >&2; exit 1; }
 [[ -f $EDGE ]] || { echo "st: missing $EDGE" >&2; exit 1; }
+[[ -f $KEY ]] || { echo "secrets: missing $KEY" >&2; exit 1; }
 
 sgdisk -Z "$DISK"
 sgdisk -n 1:0:+1G -t 1:ef00 -c 1:boot -n 2:0:0 -t 2:8304 -c 2:nixos "$DISK"
@@ -48,5 +50,9 @@ nix --extra-experimental-features nix-command --store /mnt \
 nixos-install --no-root-passwd --flake /mnt/etc/nixos#blackwell \
   --option extra-substituters https://install.determinate.systems \
   --option extra-trusted-public-keys cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM=
+
+install -d -m 700 /mnt/sachs/.ssh
+install -m 600 -o 1000 -g 100 "$KEY" /mnt/sachs/.ssh/id_ed25519
+install -m 644 -o 1000 -g 100 "$KEY.pub" /mnt/sachs/.ssh/id_ed25519.pub
 
 echo "installed. reboot. sway."
