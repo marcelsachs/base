@@ -189,6 +189,8 @@ in
     chromium
     xournalpp
     python3
+    grok-build
+    cursor-cli
   ];
 
   system.stateVersion = "26.05";
