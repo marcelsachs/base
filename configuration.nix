@@ -80,17 +80,10 @@ in
     serif = [ "IBM Plex Serif" ];
     monospace = [ "IBM Plex Mono" ];
   };
-  environment.etc."xdg/waybar/config.jsonc".source = ./waybar/config.jsonc;
-  environment.etc."xdg/waybar/style.css".source = ./waybar/style.css;
-  environment.etc."xdg/waybar/tailscale" = {
-    source = ./waybar/tailscale;
+  environment.etc."sway/status" = {
+    source = ./sway/status;
     mode = "0755";
   };
-  environment.etc."xdg/waybar/gpu" = {
-    source = ./waybar/gpu;
-    mode = "0755";
-  };
-
   environment.etc."sway/raptors.jpeg".source = ./raptors.jpeg;
 
   services.greetd = {
@@ -108,9 +101,15 @@ in
     output DP-1 mode 1920x1080@144Hz pos 1920 0
     output * bg /etc/sway/raptors.jpeg fill
     bar bar-0 {
-        swaybar_command waybar
         position bottom
-        mode dock
+        status_command /etc/sway/status
+        font pango:monospace 10
+        colors {
+            background #000000
+            statusline #ffffff
+            focused_workspace #285577 #285577 #ffffff
+            inactive_workspace #222222 #222222 #888888
+        }
     }
     input type:keyboard {
         xkb_layout de
@@ -186,7 +185,6 @@ in
     ripgrep
     wl-clipboard
     nvtopPackages.full
-    waybar
     chromium
     xournalpp
     python3
