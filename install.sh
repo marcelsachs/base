@@ -7,21 +7,14 @@
 # Both Ventoy labels are "Ventoy". 32GB is FBDE-EAD7. 500GB is 2680-E05F.
 #
 # Wipes nvme0n1: 1G ESP (label boot) + ext4 root (label nixos) + 32G swapfile.
-# Copies this directory to /mnt/etc/nixos, adds sibling st/ blobs into
-# the target store, nixos-installs #blackwell.
-# After reboot: bash /etc/nixos/bootstrap.sh
+# Copies this directory to /mnt/etc/nixos, nixos-installs #blackwell.
 set -euo pipefail
 [[ $(id -u) -eq 0 ]] || { echo "run as root" >&2; exit 1; }
 
 DISK=/dev/nvme0n1
 HERE=$(cd "$(dirname "$0")" && pwd)
 [[ $HERE == /usb/nix ]] || { echo "mount usb at /usb" >&2; exit 1; }
-STDIR=$(cd "$HERE/../st" && pwd)
-CUBE="$STDIR/SetupSTM32CubeProgrammer_linux_64.zip"
-EDGE="$STDIR/stedgeai-linux-offline"
 KEY="$HERE/../secrets/id_ed25519"
-[[ -f $CUBE ]] || { echo "st: missing $CUBE" >&2; exit 1; }
-[[ -f $EDGE ]] || { echo "st: missing $EDGE" >&2; exit 1; }
 [[ -f $KEY ]] || { echo "secrets: missing $KEY" >&2; exit 1; }
 
 sgdisk -Z "$DISK"
@@ -40,12 +33,6 @@ mkdir -p /mnt/etc/nixos
 cp -a "$HERE"/. /mnt/etc/nixos/
 rm -rf /mnt/etc/nixos/.git
 chmod -R u+w /mnt/etc/nixos
-
-echo "st: add vendor blobs to /mnt store"
-nix --extra-experimental-features nix-command --store /mnt \
-  store add --mode flat --hash-algo sha256 --name "$(basename "$CUBE")" "$CUBE"
-nix --extra-experimental-features nix-command --store /mnt \
-  store add --mode flat --hash-algo sha256 --name "$(basename "$EDGE")" "$EDGE"
 
 nixos-install --no-root-passwd --flake /mnt/etc/nixos#blackwell \
   --option extra-substituters https://install.determinate.systems \

@@ -5,7 +5,6 @@
 }:
 {
   imports = [
-    ./tools.nix
     ./users.nix
   ];
 
@@ -66,14 +65,7 @@
   services.tailscale.enable = true;
   services.tailscale.openFirewall = true;
 
-  # ST-LINK 0483:374x/375x, DFU 0483:df11, VCP 0483:5740, OpenMV 37c5, fdcanusb 16d0:0d60
   services.udev.extraRules = ''
-    SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="374?|375?", TAG+="uaccess", MODE="0666", SYMLINK+="stlink/$attr{serial}"
-    SUBSYSTEM=="tty", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="374?|375?", SYMLINK+="tty-stlink/$attr{serial}"
-    SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", TAG+="uaccess", MODE="0666", SYMLINK+="stm32dfu"
-    SUBSYSTEM=="tty", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", TAG+="uaccess", SYMLINK+="tty-stm32/$attr{serial}"
-    SUBSYSTEM=="usb", ATTRS{idVendor}=="37c5", TAG+="uaccess", MODE="0666"
-    SUBSYSTEM=="usb", ATTRS{idVendor}=="16d0", ATTRS{idProduct}=="0d60", TAG+="uaccess", MODE="0666", SYMLINK+="fdcanusb"
     SUBSYSTEM=="drm", KERNEL=="card[0-9]", KERNELS=="0000:01:00.0", SYMLINK+="dri/nvidia-card"
   '';
 
@@ -195,9 +187,6 @@
   ];
 
   systemd.tmpfiles.rules = [
-    "d /lab 0775 sachs wheel -"
-    "d /drone 0775 sachs wheel -"
-    "d /sentry 0775 sachs wheel -"
     "d /downloads 0775 sachs wheel -"
     "d /tinygrad 0775 sachs wheel -"
     "d /sachs/.grok 0755 sachs users -"
@@ -223,11 +212,6 @@
   programs.direnv.enableBashIntegration = true;
   programs.direnv.settings = {
     global.hide_env_diff = true;
-    whitelist.prefix = [
-      "/lab"
-      "/drone"
-      "/sentry"
-    ];
   };
 
   programs.ssh.knownHosts.github = {
@@ -242,9 +226,6 @@
       init.defaultBranch = "master";
       core.editor = "vim";
       safe.directory = [
-        "/lab"
-        "/drone"
-        "/sentry"
         "/etc/nixos"
         "/tinygrad"
       ];
@@ -303,10 +284,6 @@
     pciutils
     usbutils
     file
-    tio
-    dfu-util
-    v4l-utils
-    can-utils
     poppler-utils
     ripgrep
     wl-clipboard
