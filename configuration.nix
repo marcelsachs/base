@@ -44,6 +44,8 @@ in
   networking.firewall.trustedInterfaces = [ "tailscale0" ];
   services.tailscale.enable = true;
   services.tailscale.openFirewall = true;
+  # Joins the tailnet on first boot; the key is only read while the node needs login.
+  services.tailscale.authKeyFile = "/var/lib/secrets/tailscale.key";
 
   # One password for console and rescue shell; the hash lives outside the repo.
   users.mutableUsers = false;

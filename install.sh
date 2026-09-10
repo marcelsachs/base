@@ -11,11 +11,13 @@ CUBE="$STDIR/SetupSTM32CubeProgrammer_linux_64.zip"
 EDGE="$STDIR/stedgeai-linux-offline"
 KEY="$HERE/../secrets/id_ed25519"
 PW="$HERE/../secrets/password.hash"
+TS="$HERE/../secrets/tailscale.key"
 BG="$HERE/../home/.config/sway/bg"
 [[ -f $CUBE ]] || { echo "st: missing $CUBE" >&2; exit 1; }
 [[ -f $EDGE ]] || { echo "st: missing $EDGE" >&2; exit 1; }
 [[ -f $KEY ]] || { echo "secrets: missing $KEY" >&2; exit 1; }
 [[ -f $PW ]] || { echo "secrets: missing $PW (mkpasswd -m sha-512 > $PW)" >&2; exit 1; }
+[[ -f $TS ]] || { echo "secrets: missing $TS (reusable, pre-approved tailscale auth key)" >&2; exit 1; }
 [[ -f $BG ]] || { echo "home: missing $BG (the wallpaper)" >&2; exit 1; }
 [[ -d $HERE/.git ]] || { echo "nix: $HERE is not a git checkout" >&2; exit 1; }
 
@@ -33,6 +35,7 @@ mount -o fmask=0077,dmask=0077 --mkdir "${DISK}p1" /mnt/boot
 mkdir -p /mnt/etc/nixos
 cp -a "$HERE"/. /mnt/etc/nixos/
 install -D -m 600 "$PW" /mnt/var/lib/secrets/password.hash
+install -m 600 "$TS" /mnt/var/lib/secrets/tailscale.key
 
 echo "st: add vendor blobs to /mnt store"
 nix --extra-experimental-features nix-command --store /mnt \
