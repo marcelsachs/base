@@ -3,12 +3,11 @@
   pkgs,
   ...
 }:
+let
+  stprogr = pkgs.callPackage ./st/progr.nix { };
+  stedgeai = pkgs.callPackage ./st/edgeai.nix { };
+in
 {
-  imports = [
-    ./tools.nix
-    ./users.nix
-  ];
-
   networking.hostName = "blackwell";
   time.timeZone = "Europe/Berlin";
   i18n.defaultLocale = "en_US.UTF-8";
@@ -62,6 +61,35 @@
   services.openssh.settings.PermitRootLogin = "prohibit-password";
   services.openssh.settings.PrintMotd = false;
   services.openssh.settings.PrintLastLog = false;
+
+  users.mutableUsers = false;
+  users.users.root = {
+    hashedPassword = "!";
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE3mQnGAwa871FKI/aRUyHXGUKyk9h2SyNI7ASy1t7Q0 sachs@helios"
+    ];
+  };
+  users.users.sachs = {
+    isNormalUser = true;
+    uid = 1000;
+    group = "users";
+    home = "/sachs";
+    extraGroups = [
+      "wheel"
+      "video"
+      "audio"
+      "input"
+      "dialout"
+      "render"
+    ];
+    hashedPassword = "!";
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE3mQnGAwa871FKI/aRUyHXGUKyk9h2SyNI7ASy1t7Q0 sachs@helios"
+    ];
+  };
+  security.sudo.wheelNeedsPassword = false;
+  services.openssh.settings.PasswordAuthentication = false;
+
 
   services.tailscale.enable = true;
   services.tailscale.openFirewall = true;
@@ -277,6 +305,8 @@
   '';
 
   environment.systemPackages = with pkgs; [
+    stprogr
+    stedgeai
     vim
     gh
     ranger

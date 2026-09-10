@@ -1,14 +1,4 @@
 #!/usr/bin/env bash
-# Run from the Determinate NixOS live ISO, as root:
-#   mkdir -p /usb
-#   mount -t exfat /dev/mapper/sda1 /usb
-#   bash /usb/nix/install.sh
-#
-# Both Ventoy labels are "Ventoy". 32GB is FBDE-EAD7. 500GB is 2680-E05F.
-#
-# Wipes nvme0n1: 1G ESP (label boot) + ext4 root (label nixos) + 32G swapfile.
-# Copies this directory to /mnt/etc/nixos, adds sibling st/ blobs into
-# the target store, nixos-installs #blackwell.
 set -euo pipefail
 [[ $(id -u) -eq 0 ]] || { echo "run as root" >&2; exit 1; }
 
@@ -31,7 +21,6 @@ mkfs.fat -F32 -n boot "${DISK}p1"
 mkfs.ext4 -q -F -L nixos -E nodiscard "${DISK}p2"
 partprobe "$DISK"
 udevadm settle --timeout=15
-# Mount by node, not by-label: udev labels lag after wipe.
 mount "${DISK}p2" /mnt
 mount --mkdir "${DISK}p1" /mnt/boot
 
