@@ -22,7 +22,7 @@ mkfs.ext4 -q -F -L nixos -E nodiscard "${DISK}p2"
 partprobe "$DISK"
 udevadm settle --timeout=15
 mount "${DISK}p2" /mnt
-mount --mkdir "${DISK}p1" /mnt/boot
+mount -o fmask=0077,dmask=0077 --mkdir "${DISK}p1" /mnt/boot
 
 mkdir -p /mnt/etc/nixos
 cp -a "$HERE"/. /mnt/etc/nixos/
