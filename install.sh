@@ -51,7 +51,7 @@ nixos-install --no-root-passwd --flake /mnt/etc/nixos#blackwell \
   --option extra-substituters https://install.determinate.systems \
   --option extra-trusted-public-keys cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM=
 
-install -d -m 700 /mnt/sachs/.ssh
+install -d -m 700 -o 1000 -g 100 /mnt/sachs/.ssh
 install -m 600 -o 1000 -g 100 "$KEY" /mnt/sachs/.ssh/id_ed25519
 install -m 644 -o 1000 -g 100 "$KEY.pub" /mnt/sachs/.ssh/id_ed25519.pub
 
