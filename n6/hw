@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-# hw - probes and boards on this machine. Two USB ST-LINKs, one NVIDIA GPU.
+# hw - ST-LINK probes and boards.
 #
-#   hw [ls]                     probes, boards, VCP ttys, GPU
-#   hw probes                   ST-LINK serials under /dev/stlink
+#   hw [ls]                     probes, boards, VCP ttys
+#   hw probes                   serials under /dev/stlink
 #   hw serial NAME              probe serial of board NAME ($HW_BOARDS)
 #   hw tty NAME                 VCP tty of board NAME
-#   hw gpu                      nvidia-smi summary
 set -uo pipefail
 : "${HW_BOARDS:=/etc/n6/boards}"
 die() { printf 'hw: %s\n' "$*" >&2; exit 2; }
@@ -25,10 +24,6 @@ probes() {
   done
   (( found )) || { echo "none under /dev/stlink" >&2; return 1; }
 }
-gpu() {
-  [[ -e /dev/nvidia0 ]] || { echo "GPU: /dev/nvidia0 not visible (sandbox?) - run unsandboxed"; return 1; }
-  nvidia-smi --query-gpu=name,driver_version,memory.used,memory.total,utilization.gpu,temperature.gpu --format=csv,noheader
-}
 ls_all() {
   echo "probes:"
   local p found=0
@@ -46,7 +41,6 @@ ls_all() {
     st=absent; [[ $s == - ]] && st=any-probe; [[ $s != - && -e /dev/stlink/$s ]] && st=present
     printf '  %-11s %-26s %-10s %-18s %s\n' "$n" "$s" "$c" "${x:-SWD}" "$st"
   done <"$HW_BOARDS"
-  echo "gpu:"; printf '  %s\n' "$(gpu 2>&1)"
 }
 
 case ${1-ls} in
@@ -54,6 +48,5 @@ case ${1-ls} in
   probes)  probes ;;
   serial)  serial "${2:?NAME}" ;;
   tty)     tty_of "${2:?NAME}" ;;
-  gpu)     gpu ;;
   *)       sed -n '2,/^set -/p' "$0" | sed 's/^# \{0,1\}//;$d'; exit 1 ;;
 esac

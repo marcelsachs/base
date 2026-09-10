@@ -5,8 +5,6 @@
   autoPatchelfHook,
 }:
 stdenv.mkDerivation rec {
-  # Bump version + hash, then nixos-rebuild, to update the store copy.
-  # `grok update` also writes ~/.grok/bin, which is first on PATH.
   pname = "grok-cli";
   version = "1.0.13";
   src = fetchurl {

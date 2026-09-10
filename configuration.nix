@@ -66,8 +66,7 @@
   services.tailscale.enable = true;
   services.tailscale.openFirewall = true;
 
-  # STM32N6 + product USB. ST-LINK (Nucleo V3EC, OpenMV MiniE), STM32 DFU,
-  # STM32 VCP (H743), OpenMV CDC, mjbots fdcanusb.
+  # ST-LINK 0483:374x/375x, DFU 0483:df11, VCP 0483:5740, OpenMV 37c5, fdcanusb 16d0:0d60
   services.udev.extraRules = ''
     SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="374?|375?", TAG+="uaccess", MODE="0666", SYMLINK+="stlink/$attr{serial}"
     SUBSYSTEM=="tty", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="374?|375?", SYMLINK+="tty-stlink/$attr{serial}"
@@ -142,7 +141,6 @@
     enable = true;
     useTextGreeter = false;
     settings = {
-      # No greeter. Both paths are the seat.
       initial_session = {
         command = "/etc/greetd/session";
         user = "sachs";
@@ -201,28 +199,13 @@
     "d /sentry 0775 sachs wheel -"
     "d /downloads 0775 sachs wheel -"
     "d /tinygrad 0775 sachs wheel -"
-    "R /opt/st"
     "d /sachs/.grok 0755 sachs users -"
     "L+ /sachs/.grok/AGENTS.md - sachs users - /etc/nixos/AGENTS.md"
-    "L+ /sachs/.grok/sandbox.toml - sachs users - /etc/nixos/sandbox.toml"
     "L+ /sachs/.grok/config.toml - sachs users - /etc/nixos/grok.toml"
     "z /etc/nixos 0775 sachs wheel -"
-    "r /.bashrc"
-    "r /.bash_history"
-    "r /.viminfo"
-    "R /.cache"
-    "R /.config"
-    "R /.local"
-    "R /.nix-defexpr"
-    "R /.grok"
-    "R /home"
-    "R /human"
-    "R /azor"
-    "R /env"
-    "R /dl"
   ];
 
-  # systemd's home.conf is `Q /home`. Seat home is /sachs.
+  # systemd Q /home
   environment.etc."tmpfiles.d/home.conf".text = pkgs.lib.mkForce ''
     q /srv 0755 - - -
   '';
@@ -265,67 +248,20 @@
     set tabstop=4
     syntax on
 
-    func WlClipAvailable()
-      return executable("wl-copy") && executable("wl-paste")
-    endfunc
-    func WlClipCopy(reg, type, lines)
-      let text = join(a:lines, "\n")
-      if a:type ==# "V"
-        let text .= "\n"
-      endif
-      call system("wl-copy", text)
-    endfunc
-    func WlClipPaste(reg)
-      return ["", systemlist("wl-paste --no-newline")]
-    endfunc
-    let v:clipproviders["wl"] = {
-      \ "available": function("WlClipAvailable"),
-      \ "copy": { "+": function("WlClipCopy"), "*": function("WlClipCopy") },
-      \ "paste": { "+": function("WlClipPaste"), "*": function("WlClipPaste") },
-      \ }
-    set clipmethod=wl
     set clipboard=unnamedplus
+    autocmd TextYankPost * if v:event.operator ==# 'y'
+          \ | call system("wl-copy", join(v:event.regcontents, "\n"))
+          \ | endif
   '';
 
-  environment.etc."blackwell-env.sh".text = ''
-    export EDITOR=vim
-    export DL=/downloads
-    export XDG_DOWNLOAD_DIR=/downloads
-    export TINYGRAD=/tinygrad
-    export GROK_HOME="$HOME/.grok"
-    export HISTFILE="$HOME/.bash_history"
-    export LIBC_PATH=${pkgs.glibc}/lib/libc.so.6
-    export CUDA_PATH=${pkgs.cudaPackages.cuda_cudart}
-    export CPATH=$CUDA_PATH/include''${CPATH:+:$CPATH}
-    export NVRTC_PATH=${pkgs.cudaPackages.cuda_nvrtc.lib}/lib/libnvrtc.so
-    export NVJITLINK_PATH=${pkgs.cudaPackages.libnvjitlink.lib}/lib/libnvJitLink.so
-    export LD_LIBRARY_PATH=/run/opengl-driver/lib:${
-      pkgs.lib.makeLibraryPath [
-        pkgs.cudaPackages.cuda_nvrtc.lib
-        pkgs.cudaPackages.libnvjitlink.lib
-        pkgs.stdenv.cc.cc
-        pkgs.libusb1
-        pkgs.zlib
-        pkgs.zstd
-        pkgs.glib
-        pkgs.krb5
-        pkgs.brotli
-      ]
-    }''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
-    path_del() {
-      local d=$1 e= p IFS=:
-      for p in $PATH; do [[ $p == "$d" || -z $p ]] && continue; e=''${e:+$e:}$p; done
-      PATH=$e
-    }
-    path_prepend() { path_del "$1"; PATH="$1:$PATH"; }
-    export PATH
-  '';
-  environment.variables.BASH_ENV = "/etc/blackwell-env.sh";
   environment.variables.EDITOR = "vim";
   environment.variables.BROWSER = "chromium";
   environment.variables.DL = "/downloads";
   environment.variables.XDG_DOWNLOAD_DIR = "/downloads";
   environment.variables.TINYGRAD = "/tinygrad";
+  environment.variables.CUDA_PATH = "${pkgs.cudaPackages.cuda_cudart}";
+  environment.variables.NVRTC_PATH = "${pkgs.cudaPackages.cuda_nvrtc.lib}/lib/libnvrtc.so";
+  environment.variables.NVJITLINK_PATH = "${pkgs.cudaPackages.libnvjitlink.lib}/lib/libnvJitLink.so";
   xdg.mime.defaultApplications = {
     "text/html" = "chromium-browser.desktop";
     "x-scheme-handler/http" = "chromium-browser.desktop";
@@ -334,7 +270,6 @@
   environment.variables.NIX_SHELL_PRESERVE_PROMPT = "1";
   programs.bash.completion.enable = true;
   environment.interactiveShellInit = ''
-    . /etc/blackwell-env.sh
     PS1='\[\033[1;38;5;39m\]\w \[\033[1;38;5;226m\]$ \[\033[0m\]'
     HISTSIZE=50000
     HISTFILESIZE=100000
@@ -347,8 +282,7 @@
 
   environment.systemPackages = with pkgs; [
     vim
-    git
-    git-lfs
+    gh
     ranger
     curl
     wget

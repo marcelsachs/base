@@ -25,5 +25,3 @@ clone_desk /sentry git@github.com:marcelsachs/sentry.git
 
 chmod 2775 /drone /sentry
 echo "desks cloned."
-echo "tinygrad: clone upstream into /tinygrad, then gpu"
-echo "plug a board, n6 load ELF"

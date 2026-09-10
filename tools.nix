@@ -27,20 +27,6 @@ let
   hw = pkgs.writeShellScriptBin "hw" (builtins.readFile ./n6/hw);
   stprogr = pkgs.callPackage ./st/progr.nix { };
   stedgeai = pkgs.callPackage ./st/edgeai.nix { };
-  gpu = pkgs.writeShellScriptBin "gpu" ''
-    set -euo pipefail
-    if [[ ! -r /tinygrad/.venv/bin/activate ]]; then
-      echo "gpu: no /tinygrad/.venv" >&2
-      exit 1
-    fi
-    # shellcheck disable=SC1091
-    . /tinygrad/.venv/bin/activate
-    if [[ $# -eq 0 ]]; then
-      nvidia-smi 2>/dev/null || true
-      exec bash
-    fi
-    exec "$@"
-  '';
 in
 {
   environment.etc."n6/boards".source = ./n6/boards;
@@ -59,7 +45,6 @@ in
     pkgs.unzip
     n6
     hw
-    gpu
     stprogr
     stedgeai
   ];

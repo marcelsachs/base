@@ -1,3 +1,0 @@
-[profiles.desks]
-extends = "workspace"
-read_write = ["/", "/sachs", "/drone", "/sentry", "/downloads", "/etc/nixos", "/tinygrad"]

@@ -2,9 +2,7 @@
   description = "base";
 
   inputs = {
-    # 0.1 = rolling. 5060 Ti nvidia.
     nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1";
-    # Do not follows nixpkgs onto determinate: cache miss.
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
   };
 

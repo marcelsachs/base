@@ -365,6 +365,43 @@ result: option 1. wipe + install.sh builds stprogr and stedgeai from USB st/.
 
 result: working tree is the base snapshot. GitHub create/push needs helios (no key on this box).
 
+## 2026-09-09 15:55 tmpfiles-trim-vim-clip
+
+    drop tmpfiles R /opt/st /dl /home /human /azor /env and root-seat /.* dots
+    keep home.conf override (systemd Q /home). rmdir leftover empty /home
+    vimrc: TextYankPost -> wl-copy. this vim is -wayland -clipboard
+    nixos-rebuild switch --flake /etc/nixos#blackwell
+
+result: tmpfiles only desks + grok links + /etc/nixos mode. yank goes to CLIPBOARD.
+
+## 2026-09-09 16:05 nixos-trim
+
+    drop unused path_del/path_prepend, duplicate git/chromium packages, .envrc, docs/README.md
+    comments: keep pin/command/brick only
+
+result: flake eval blackwell. git via programs.git. chromium is a package (programs.chromium is policies only).
+
+## 2026-09-09 16:20 n6-trim
+
+    n6 check: no stprogr/stedgeai. n6 dash gone. hw no GPU. drop gpu from PATH
+    nixos-rebuild switch --flake /etc/nixos#blackwell
+
+result: n6 is info/load/mon/gdb/check. waybar gpu script unchanged.
+
+## 2026-09-09 16:35 drop-sandbox-env
+
+    rm sandbox.toml. n6 load no dashboard, kill openocd on exit. drop /etc/blackwell-env.sh
+    CUDA_PATH in environment.variables. nixos-rebuild switch --flake /etc/nixos#blackwell
+
+result: grok sandbox off (default). no BASH_ENV.
+
+## 2026-09-09 19:20 gh
+
+    environment.systemPackages += gh
+    nixos-rebuild switch --flake /etc/nixos#blackwell
+
+result: gh on PATH. GitHub push still needs `gh auth login`.
+
 
 
 

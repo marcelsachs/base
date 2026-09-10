@@ -7,7 +7,6 @@
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE3mQnGAwa871FKI/aRUyHXGUKyk9h2SyNI7ASy1t7Q0 sachs@helios"
     ];
   };
-  # Seat. Autologin. HOME=/sachs.
   users.users.sachs = {
     isNormalUser = true;
     uid = 1000;
