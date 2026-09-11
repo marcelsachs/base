@@ -27,11 +27,8 @@ BG=$USB/home/.config/sway/bg
 [[ -f $PW ]] || { echo "secrets: missing $PW (mkpasswd -m sha-512 > $PW)" >&2; exit 1; }
 [[ -f $TS ]] || { echo "secrets: missing $TS (reusable, pre-approved tailscale auth key)" >&2; exit 1; }
 [[ -f $GH ]] || { echo "secrets: missing $GH (classic PAT, no expiry, scopes: repo read:org workflow gist)" >&2; exit 1; }
+ST=("$USB"/st/SetupSTM32CubeProgrammer_linux_64.zip "$USB"/st/stedgeai-linux-offline)
 [[ -f $BG ]] || { echo "home: missing $BG (the wallpaper)" >&2; exit 1; }
-# ST's installers for stprogr and stedgeai live on the Ventoy stick, next to the ISOs.
-VENTOY=/ventoy
-mountpoint -q "$VENTOY" || mount --mkdir -o ro /dev/disk/by-label/Ventoy "$VENTOY"
-ST=("$VENTOY"/st/SetupSTM32CubeProgrammer_linux_64.zip "$VENTOY"/st/stedgeai-linux-offline)
 for f in "${ST[@]}"; do [[ -f $f ]] || { echo "st: missing $f (from st.com, see stm32n6)" >&2; exit 1; }; done
 read -rp "nix: $(git -C "$HERE" log -1 --date=format:'%F %R' --format='%h %cd %s'). Enter to install, Ctrl-C to stop. "
 
@@ -78,6 +75,5 @@ EOF
 install -D -m 644 "$BG" /mnt/home/sachs/.config/sway/bg
 chown -R 1000:100 /mnt/etc/nixos /mnt/home/sachs
 
-umount "$VENTOY"
 if [[ $opened ]]; then umount "$USB" && cryptsetup close usb; fi
 echo $SECONDS
