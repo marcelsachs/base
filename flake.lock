@@ -215,7 +215,24 @@
       "inputs": {
         "determinate": "determinate",
         "nixpkgs": "nixpkgs_3",
+        "stm32n6": "stm32n6",
         "tinygrad": "tinygrad"
+      }
+    },
+    "stm32n6": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1789128091,
+        "narHash": "sha256-ofbSWYlbnTNdwm4S7RvUXO/kPrRuvLRYnkKe1icSDOQ=",
+        "ref": "refs/heads/master",
+        "rev": "20eb978bdbd86c7524865974b0bda078d77560f4",
+        "revCount": 3,
+        "type": "git",
+        "url": "ssh://git@github.com/marcelsachs/stm32n6"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/marcelsachs/stm32n6"
       }
     },
     "tinygrad": {

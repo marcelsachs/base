@@ -7,6 +7,9 @@
 }:
 let
   tinygrad = pkgs.callPackage ./tinygrad.nix { src = inputs.tinygrad; };
+  # STM32N657 tooling. Both are requireFile: put ST's installers in the store first (see stm32n6).
+  stprogr = pkgs.callPackage "${inputs.stm32n6}/stprogr.nix" { };
+  stedgeai = pkgs.callPackage "${inputs.stm32n6}/stedgeai.nix" { };
   # swaybar status_command: one line per second. nvidia-smi only every 5th tick.
   status = pkgs.writeShellApplication {
     name = "status";
@@ -231,6 +234,8 @@ in
     chromium
     xournalpp
     tinygrad
+    stprogr
+    stedgeai
     grok-build
     cursor-cli
   ];

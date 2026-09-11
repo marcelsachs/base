@@ -8,6 +8,11 @@
       url = "github:tinygrad/tinygrad";
       flake = false;
     };
+    # Private repo, fetched over ssh with sachs's key: build as sachs, nixos-rebuild --sudo.
+    stm32n6 = {
+      url = "git+ssh://git@github.com/marcelsachs/stm32n6";
+      flake = false;
+    };
   };
 
   outputs =
