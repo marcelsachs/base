@@ -28,6 +28,11 @@ BG=$USB/home/.config/sway/bg
 [[ -f $TS ]] || { echo "secrets: missing $TS (reusable, pre-approved tailscale auth key)" >&2; exit 1; }
 [[ -f $GH ]] || { echo "secrets: missing $GH (classic PAT, no expiry, scopes: repo read:org workflow gist)" >&2; exit 1; }
 [[ -f $BG ]] || { echo "home: missing $BG (the wallpaper)" >&2; exit 1; }
+# ST's installers for stprogr and stedgeai live on the Ventoy stick, next to the ISOs.
+VENTOY=/ventoy
+mountpoint -q "$VENTOY" || mount --mkdir -o ro /dev/disk/by-label/Ventoy "$VENTOY"
+ST=("$VENTOY"/st/SetupSTM32CubeProgrammer_linux_64.zip "$VENTOY"/st/stedgeai-linux-offline)
+for f in "${ST[@]}"; do [[ -f $f ]] || { echo "st: missing $f (from st.com, see stm32n6)" >&2; exit 1; }; done
 read -rp "nix: $(git -C "$HERE" log -1 --date=format:'%F %R' --format='%h %cd %s'). Enter to install, Ctrl-C to stop. "
 
 sgdisk -Z "$DISK"
@@ -46,6 +51,10 @@ cp -a "$HERE"/. /mnt/etc/nixos/
 git -C /mnt/etc/nixos remote set-url origin git@github.com:marcelsachs/base.git
 install -D -m 600 "$PW" /mnt/var/lib/secrets/password.hash
 install -m 600 "$TS" /mnt/var/lib/secrets/tailscale.key
+
+# stprogr and stedgeai are requireFile: ST's installers must already be in the store being built
+# into. --add-fixed sha256 is exactly requireFile's path.
+for f in "${ST[@]}"; do nix-store --store /mnt --add-fixed sha256 "$f"; done
 
 nixos-install --no-root-passwd --flake /mnt/etc/nixos#blackwell \
   --option extra-substituters https://install.determinate.systems \
@@ -69,5 +78,6 @@ EOF
 install -D -m 644 "$BG" /mnt/home/sachs/.config/sway/bg
 chown -R 1000:100 /mnt/etc/nixos /mnt/home/sachs
 
+umount "$VENTOY"
 if [[ $opened ]]; then umount "$USB" && cryptsetup close usb; fi
 echo $SECONDS
