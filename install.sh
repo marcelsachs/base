@@ -21,10 +21,12 @@ fi
 KEY=$USB/secrets/id_ed25519
 PW=$USB/secrets/password.hash
 TS=$USB/secrets/tailscale.key
+GH=$USB/secrets/github.token
 BG=$USB/home/.config/sway/bg
 [[ -f $KEY ]] || { echo "secrets: missing $KEY" >&2; exit 1; }
 [[ -f $PW ]] || { echo "secrets: missing $PW (mkpasswd -m sha-512 > $PW)" >&2; exit 1; }
 [[ -f $TS ]] || { echo "secrets: missing $TS (reusable, pre-approved tailscale auth key)" >&2; exit 1; }
+[[ -f $GH ]] || { echo "secrets: missing $GH (classic PAT, no expiry, scopes: repo read:org workflow gist)" >&2; exit 1; }
 [[ -f $BG ]] || { echo "home: missing $BG (the wallpaper)" >&2; exit 1; }
 read -rp "nix: $(git -C "$HERE" log -1 --date=format:'%F %R' --format='%h %cd %s'). Enter to install, Ctrl-C to stop. "
 
@@ -52,6 +54,18 @@ nixos-install --no-root-passwd --flake /mnt/etc/nixos#blackwell \
 install -d -m 700 /mnt/home/sachs/.ssh
 install -m 600 "$KEY" /mnt/home/sachs/.ssh/id_ed25519
 install -m 644 "$KEY.pub" /mnt/home/sachs/.ssh/id_ed25519.pub
+install -d -m 700 /mnt/home/sachs/.config/gh
+tok=$(<"$GH")
+(umask 077; cat > /mnt/home/sachs/.config/gh/hosts.yml <<EOF
+github.com:
+    user: marcelsachs
+    oauth_token: $tok
+    git_protocol: ssh
+    users:
+        marcelsachs:
+            oauth_token: $tok
+EOF
+)
 install -D -m 644 "$BG" /mnt/home/sachs/.config/sway/bg
 chown -R 1000:100 /mnt/etc/nixos /mnt/home/sachs
 
