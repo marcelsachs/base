@@ -7,6 +7,7 @@
 }:
 let
   tinygrad = pkgs.callPackage ./tinygrad.nix { src = inputs.tinygrad; };
+  cursor = pkgs.callPackage ./cursor.nix { };
   # STM32N657 tooling. Both are requireFile: put ST's installers in the store first (see stm32n6).
   stprogr = pkgs.callPackage "${inputs.stm32n6}/stprogr.nix" { };
   stedgeai = pkgs.callPackage "${inputs.stm32n6}/stedgeai.nix" { };
@@ -238,6 +239,7 @@ in
     stedgeai
     grok-build
     cursor-cli
+    cursor
   ];
 
   system.stateVersion = "26.05";
