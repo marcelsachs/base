@@ -222,11 +222,11 @@
     "stm32n6": {
       "flake": false,
       "locked": {
-        "lastModified": 1789128091,
-        "narHash": "sha256-ofbSWYlbnTNdwm4S7RvUXO/kPrRuvLRYnkKe1icSDOQ=",
+        "lastModified": 1789129511,
+        "narHash": "sha256-FNiZJ+qs+aQdG6xvzzBOlDbLH9ixRtRu80mfvWjYhbg=",
         "ref": "refs/heads/master",
-        "rev": "20eb978bdbd86c7524865974b0bda078d77560f4",
-        "revCount": 3,
+        "rev": "96bc2403d229b53183122d29043f75e8a3aacf75",
+        "revCount": 4,
         "type": "git",
         "url": "ssh://git@github.com/marcelsachs/stm32n6"
       },
