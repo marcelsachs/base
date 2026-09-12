@@ -7,6 +7,11 @@
       user.email = "sachsmarcel@proton.me";
       init.defaultBranch = "master";
       safe.directory = [
+        "/base"
+        "/docs"
+        "/drone"
+        "/sentry"
+        "/lab"
         "/etc/nixos"
       ];
     };

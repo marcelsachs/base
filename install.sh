@@ -68,8 +68,10 @@ mkfs.ext4 -q -F -L nixos -E nodiscard "${DISK}p2"
 mount "${DISK}p2" /mnt
 mount -o fmask=0077,dmask=0077 --mkdir "${DISK}p1" /mnt/boot
 
-git clone -- "$HERE" /mnt/etc/nixos
-git -C /mnt/etc/nixos remote set-url origin git@github.com:marcelsachs/base.git
+mkdir -p /mnt/etc
+git clone -- "$HERE" /mnt/base
+ln -sfn ../base /mnt/etc/nixos
+git -C /mnt/base remote set-url origin git@github.com:marcelsachs/base.git
 
 if [[ $attr == blackwell ]]; then
   install -D -m 600 "$USB"/secrets/password.hash /mnt/var/lib/secrets/password.hash
@@ -82,9 +84,9 @@ if [[ $attr == blackwell ]]; then
   nix-store --store /mnt --add-fixed sha256 "$USB"/st/stedgeai-linux-offline
 fi
 
-nixos-install --no-root-passwd --flake /mnt/etc/nixos#$attr \
+nixos-install --no-root-passwd --flake /mnt/base#$attr \
   --option extra-substituters https://install.determinate.systems \
   --option extra-trusted-public-keys cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM=
 
-chown -R 1000:100 /mnt/etc/nixos
+chown -R 1000:100 /mnt/base
 [[ -d /mnt/home/sachs ]] && chown -R 1000:100 /mnt/home/sachs
