@@ -1,8 +1,6 @@
 { pkgs, ... }:
-{
-  environment.systemPackages = [ pkgs.vim ];
-  environment.variables.EDITOR = "vim";
-  environment.etc.vimrc.text = ''
+let
+  vimrc = pkgs.writeText "vimrc" ''
     colorscheme lunaperche
     set background=dark
     set expandtab
@@ -12,9 +10,14 @@
     set shiftwidth=4
     set tabstop=4
     syntax on
-
-    autocmd TextYankPost * if v:event.operator ==# 'y'
-          \ | call system("wl-copy", join(v:event.regcontents, "\n"))
-          \ | endif
+    autocmd TextYankPost * call system("wl-copy", @")
   '';
+in
+{
+  environment.systemPackages = [
+    (pkgs.writeShellScriptBin "vim" ''
+      exec ${pkgs.vim}/bin/vim -u ${vimrc} "$@"
+    '')
+  ];
+  environment.variables.EDITOR = "vim";
 }
