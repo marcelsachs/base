@@ -46,10 +46,35 @@ let
       done
     '';
   };
+  shot = pkgs.writeShellApplication {
+    name = "shot";
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.grim
+      pkgs.slurp
+    ];
+    text = ''
+      dir=$HOME/shots
+      mkdir -p "$dir"
+      geom=$(slurp -d) || exit 1
+      [[ $geom =~ ([0-9]+)x([0-9]+)$ ]] || exit 1
+      if ((BASH_REMATCH[1] < 8 || BASH_REMATCH[2] < 8)); then
+        echo "shot: selection ''${BASH_REMATCH[1]}x''${BASH_REMATCH[2]} is too small; click-drag a rectangle" >&2
+        exit 1
+      fi
+      file=$dir/$(date +%F_%H-%M-%S).png
+      grim -g "$geom" "$file"
+      printf '%s\n' "$file"
+    '';
+  };
 in
 {
   programs.sway.enable = true;
   programs.sway.wrapperFeatures.gtk = true;
+  environment.systemPackages = [
+    pkgs.slurp
+    shot
+  ];
   # Monitors are on the Raphael iGPU; the RTX is compute-only and stays out of sway.
   # WLR_DRM_DEVICES is colon-separated, so the by-path name (pci-0000:0e:00.0-card) can't be used.
   services.udev.extraRules = ''
