@@ -9,61 +9,24 @@ USB=/usb
 HERE=$(cd "$(dirname "$0")" && pwd)
 [[ -d $HERE/.git ]] || { echo "not a git checkout: $HERE" >&2; exit 1; }
 
-opened=
-cleanup() {
-  case $opened in
-  ventoy | mapper) umount "$USB" ;;
-  luks) umount "$USB" && cryptsetup close usb ;;
-  esac
-}
-trap cleanup EXIT
+mountpoint -q "$USB" || mount --mkdir /dev/mapper/sda1 "$USB"
 
-if ! mountpoint -q "$USB"; then
-  if [[ -e /dev/disk/by-label/Ventoy ]]; then
-    mount --mkdir /dev/disk/by-label/Ventoy "$USB"
-    opened=ventoy
-  elif [[ -b /dev/mapper/sda1 ]]; then
-    mount --mkdir /dev/mapper/sda1 "$USB"
-    opened=mapper
-  else
-    mapfile -t luks < <(blkid -t TYPE=crypto_LUKS -o device)
-    if ((${#luks[@]} == 1)); then
-      mapped=$(lsblk -nrpo NAME,TYPE "${luks[0]}" | awk '$2 == "crypt" { print $1; exit }')
-      if [[ -n ${mapped-} ]]; then
-        mount --mkdir "$mapped" "$USB"
-        opened=mapper
-      else
-        [[ -e /dev/mapper/usb ]] || cryptsetup open "${luks[0]}" usb
-        mount --mkdir /dev/mapper/usb "$USB"
-        opened=luks
-      fi
-    fi
+attr=blackwell
+for f in \
+  "$USB"/secrets/password.hash \
+  "$USB"/secrets/tailscale.key \
+  "$USB"/home/.ssh/id_ed25519 \
+  "$USB"/home/.ssh/id_ed25519.pub \
+  "$USB"/home/.config/gh/hosts.yml \
+  "$USB"/home/.config/sway/bg \
+  "$USB"/st/SetupSTM32CubeProgrammer_linux_64.zip \
+  "$USB"/st/stedgeai-linux-offline; do
+  if [[ ! -e $f ]]; then
+    echo "missing $f"
+    attr=blackwell-bare
+    break
   fi
-fi
-
-attr=blackwell-bare
-if mountpoint -q "$USB"; then
-  attr=blackwell
-  for f in \
-    "$USB"/secrets/password.hash \
-    "$USB"/secrets/tailscale.key \
-    "$USB"/home/.ssh/id_ed25519 \
-    "$USB"/home/.ssh/id_ed25519.pub \
-    "$USB"/home/.config/gh/hosts.yml \
-    "$USB"/home/.config/sway/bg \
-    "$USB"/st/SetupSTM32CubeProgrammer_linux_64.zip \
-    "$USB"/st/stedgeai-linux-offline; do
-    if [[ ! -e $f ]]; then
-      echo "missing $f"
-      attr=blackwell-bare
-      break
-    fi
-  done
-fi
-if [[ $attr == blackwell-bare ]]; then
-  cleanup
-  opened=
-fi
+done
 
 read -rp "wipe $DISK, $attr $(git -C "$HERE" log -1 --format='%h %s'). Enter / Ctrl-C. "
 
