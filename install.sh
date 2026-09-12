@@ -24,26 +24,39 @@ if ! mountpoint -q "$USB"; then
     opened=ventoy
   else
     mapfile -t luks < <(blkid -t TYPE=crypto_LUKS -o device)
-    ((${#luks[@]} == 1)) || { echo "usb: no Ventoy label, ${#luks[@]} LUKS devices, mount $USB yourself" >&2; exit 1; }
-    [[ -e /dev/mapper/usb ]] || cryptsetup open "${luks[0]}" usb
-    mount --mkdir /dev/mapper/usb "$USB"
-    opened=luks
+    if ((${#luks[@]} == 1)); then
+      [[ -e /dev/mapper/usb ]] || cryptsetup open "${luks[0]}" usb
+      mount --mkdir /dev/mapper/usb "$USB"
+      opened=luks
+    fi
   fi
 fi
 
-for f in \
-  "$USB"/secrets/password.hash \
-  "$USB"/secrets/tailscale.key \
-  "$USB"/home/.ssh/id_ed25519 \
-  "$USB"/home/.ssh/id_ed25519.pub \
-  "$USB"/home/.config/gh/hosts.yml \
-  "$USB"/home/.config/sway/bg \
-  "$USB"/st/SetupSTM32CubeProgrammer_linux_64.zip \
-  "$USB"/st/stedgeai-linux-offline; do
-  [[ -e $f ]] || { echo "missing $f" >&2; exit 1; }
-done
+attr=blackwell-bare
+if mountpoint -q "$USB"; then
+  attr=blackwell
+  for f in \
+    "$USB"/secrets/password.hash \
+    "$USB"/secrets/tailscale.key \
+    "$USB"/home/.ssh/id_ed25519 \
+    "$USB"/home/.ssh/id_ed25519.pub \
+    "$USB"/home/.config/gh/hosts.yml \
+    "$USB"/home/.config/sway/bg \
+    "$USB"/st/SetupSTM32CubeProgrammer_linux_64.zip \
+    "$USB"/st/stedgeai-linux-offline; do
+    if [[ ! -e $f ]]; then
+      echo "missing $f"
+      attr=blackwell-bare
+      break
+    fi
+  done
+fi
+if [[ $attr == blackwell-bare ]]; then
+  cleanup
+  opened=
+fi
 
-read -rp "wipe $DISK, install $(git -C "$HERE" log -1 --format='%h %s'). Enter / Ctrl-C. "
+read -rp "wipe $DISK, $attr $(git -C "$HERE" log -1 --format='%h %s'). Enter / Ctrl-C. "
 
 sgdisk -Z "$DISK"
 sgdisk -n 1:0:+1G -t 1:ef00 -c 1:boot -n 2:0:0 -t 2:8304 -c 2:nixos "$DISK"
@@ -58,18 +71,20 @@ mount -o fmask=0077,dmask=0077 --mkdir "${DISK}p1" /mnt/boot
 git clone -- "$HERE" /mnt/etc/nixos
 git -C /mnt/etc/nixos remote set-url origin git@github.com:marcelsachs/base.git
 
-install -D -m 600 "$USB"/secrets/password.hash /mnt/var/lib/secrets/password.hash
-install -D -m 600 "$USB"/secrets/tailscale.key /mnt/var/lib/secrets/tailscale.key
-mkdir -p /mnt/home/sachs
-cp -a "$USB"/home/. /mnt/home/sachs/
-chmod 700 /mnt/home/sachs/.ssh /mnt/home/sachs/.config/gh
-chmod 600 /mnt/home/sachs/.ssh/id_ed25519 /mnt/home/sachs/.config/gh/hosts.yml
+if [[ $attr == blackwell ]]; then
+  install -D -m 600 "$USB"/secrets/password.hash /mnt/var/lib/secrets/password.hash
+  install -D -m 600 "$USB"/secrets/tailscale.key /mnt/var/lib/secrets/tailscale.key
+  mkdir -p /mnt/home/sachs
+  cp -a "$USB"/home/. /mnt/home/sachs/
+  chmod 700 /mnt/home/sachs/.ssh /mnt/home/sachs/.config/gh
+  chmod 600 /mnt/home/sachs/.ssh/id_ed25519 /mnt/home/sachs/.config/gh/hosts.yml
+  nix-store --store /mnt --add-fixed sha256 "$USB"/st/SetupSTM32CubeProgrammer_linux_64.zip
+  nix-store --store /mnt --add-fixed sha256 "$USB"/st/stedgeai-linux-offline
+fi
 
-nix-store --store /mnt --add-fixed sha256 "$USB"/st/SetupSTM32CubeProgrammer_linux_64.zip
-nix-store --store /mnt --add-fixed sha256 "$USB"/st/stedgeai-linux-offline
-
-nixos-install --no-root-passwd --flake /mnt/etc/nixos#blackwell \
+nixos-install --no-root-passwd --flake /mnt/etc/nixos#$attr \
   --option extra-substituters https://install.determinate.systems \
   --option extra-trusted-public-keys cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM=
 
-chown -R 1000:100 /mnt/etc/nixos /mnt/home/sachs
+chown -R 1000:100 /mnt/etc/nixos
+[[ -d /mnt/home/sachs ]] && chown -R 1000:100 /mnt/home/sachs

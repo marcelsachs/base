@@ -1,6 +1,13 @@
-{ pkgs, inputs, ... }:
 {
-  environment.systemPackages = [
-    (pkgs.callPackage "${inputs.stm32n6}/stedgeai.nix" { })
-  ];
+  pkgs,
+  lib,
+  config,
+  ...
+}:
+{
+  config = lib.mkIf config.stick.enable {
+    environment.systemPackages = [
+      (pkgs.callPackage ../packages/stedgeai.nix { })
+    ];
+  };
 }

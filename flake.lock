@@ -215,24 +215,7 @@
       "inputs": {
         "determinate": "determinate",
         "nixpkgs": "nixpkgs_3",
-        "stm32n6": "stm32n6",
         "tinygrad": "tinygrad"
-      }
-    },
-    "stm32n6": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1789130334,
-        "narHash": "sha256-c2TohFoyO2Xm0H4F8Srjxyg2agzqhWZC4XiAHwaC20I=",
-        "owner": "marcelsachs",
-        "repo": "stm32n6",
-        "rev": "da15172218b04069d68007a6161f087dc2681aac",
-        "type": "github"
-      },
-      "original": {
-        "owner": "marcelsachs",
-        "repo": "stm32n6",
-        "type": "github"
       }
     },
     "tinygrad": {
