@@ -1,0 +1,35 @@
+{
+  imports = [
+    ./bash.nix
+    ./boot.nix
+    ./chromium.nix
+    ./cursor.nix
+    ./direnv.nix
+    ./file.nix
+    ./fonts.nix
+    ./foot.nix
+    ./gh.nix
+    ./git.nix
+    ./grok.nix
+    ./host.nix
+    ./networking.nix
+    ./nix.nix
+    ./nvidia.nix
+    ./nvtop.nix
+    ./pciutils.nix
+    ./poppler.nix
+    ./ranger.nix
+    ./ripgrep.nix
+    ./ssh.nix
+    ./stedgeai.nix
+    ./stprogr.nix
+    ./sway.nix
+    ./tailscale.nix
+    ./tinygrad.nix
+    ./usbutils.nix
+    ./users.nix
+    ./vim.nix
+    ./wl-clipboard.nix
+    ./xournalpp.nix
+  ];
+}

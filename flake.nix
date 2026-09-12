@@ -18,10 +18,6 @@
     { self, ... }@inputs:
     let
       system = "x86_64-linux";
-      pkgs = import inputs.nixpkgs {
-        inherit system;
-        config.allowUnfree = true;
-      };
     in
     {
       nixosConfigurations.blackwell = inputs.nixpkgs.lib.nixosSystem {
@@ -30,10 +26,10 @@
         modules = [
           inputs.determinate.nixosModules.default
           ./hardware-configuration.nix
-          ./configuration.nix
+          ./modules
         ];
       };
 
-      formatter.${system} = pkgs.nixfmt;
+      formatter.${system} = inputs.nixpkgs.legacyPackages.${system}.nixfmt;
     };
 }
