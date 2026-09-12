@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+SECONDS=0
 ((EUID == 0)) || { echo "run as root" >&2; exit 1; }
 command -v git >/dev/null || exec nix shell nixpkgs#git -c "$0" "$@"
 git() { command git -c safe.directory='*' "$@"; }
@@ -62,3 +63,4 @@ nixos-install --no-root-passwd --flake /mnt/base#$attr \
 
 chown -R 1000:100 /mnt/base
 [[ -d /mnt/home/sachs ]] && chown -R 1000:100 /mnt/home/sachs
+echo $SECONDS
