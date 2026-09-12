@@ -12,7 +12,7 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 opened=
 cleanup() {
   case $opened in
-  ventoy) umount "$USB" ;;
+  ventoy | mapper) umount "$USB" ;;
   luks) umount "$USB" && cryptsetup close usb ;;
   esac
 }
@@ -22,12 +22,21 @@ if ! mountpoint -q "$USB"; then
   if [[ -e /dev/disk/by-label/Ventoy ]]; then
     mount --mkdir /dev/disk/by-label/Ventoy "$USB"
     opened=ventoy
+  elif [[ -b /dev/mapper/sda1 ]]; then
+    mount --mkdir /dev/mapper/sda1 "$USB"
+    opened=mapper
   else
     mapfile -t luks < <(blkid -t TYPE=crypto_LUKS -o device)
     if ((${#luks[@]} == 1)); then
-      [[ -e /dev/mapper/usb ]] || cryptsetup open "${luks[0]}" usb
-      mount --mkdir /dev/mapper/usb "$USB"
-      opened=luks
+      mapped=$(lsblk -nrpo NAME,TYPE "${luks[0]}" | awk '$2 == "crypt" { print $1; exit }')
+      if [[ -n ${mapped-} ]]; then
+        mount --mkdir "$mapped" "$USB"
+        opened=mapper
+      else
+        [[ -e /dev/mapper/usb ]] || cryptsetup open "${luks[0]}" usb
+        mount --mkdir /dev/mapper/usb "$USB"
+        opened=luks
+      fi
     fi
   fi
 fi
