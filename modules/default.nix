@@ -12,6 +12,7 @@
     ./git.nix
     ./grok.nix
     ./host.nix
+    ./kicad.nix
     ./networking.nix
     ./nix.nix
     ./nvidia.nix
