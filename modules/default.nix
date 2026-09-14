@@ -1,6 +1,7 @@
 {
   imports = [
     ./bash.nix
+    ./bambu-studio.nix
     ./boot.nix
     ./chromium.nix
     ./cursor.nix
