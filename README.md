@@ -13,3 +13,5 @@ nix shell nixpkgs#git -c git clone https://github.com/marcelsachs/base /tmp/base
 ```
 
 `/etc/nixos` is a symlink to `/base`.
+
+Sister repos (private): [`drone`](https://github.com/marcelsachs/drone), [`sentry`](https://github.com/marcelsachs/sentry).
