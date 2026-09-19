@@ -1,7 +1,5 @@
 { pkgs, ... }:
 let
-  # -S after normal startup. -u replaces $VIM/vimrc, which is what
-  # broke Backspace (that file already sets nocompatible/backspace).
   vimrc = pkgs.writeText "vimrc" ''
     colorscheme lunaperche
     set background=dark
