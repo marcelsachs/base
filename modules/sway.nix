@@ -71,21 +71,19 @@ in
 {
   programs.sway.enable = true;
   programs.sway.wrapperFeatures.gtk = true;
+  programs.sway.extraOptions = [ "--unsupported-gpu" ];
   environment.systemPackages = [
     pkgs.slurp
     shot
   ];
-  # Monitors are on the Raphael iGPU; the RTX is compute-only and stays out of sway.
-  # WLR_DRM_DEVICES is colon-separated, so the by-path name (pci-0000:0e:00.0-card) can't be used.
-  services.udev.extraRules = ''
-    SUBSYSTEM=="drm", KERNEL=="card[0-9]*", DRIVERS=="amdgpu", SYMLINK+="dri/igpu"
-  '';
-  programs.sway.extraSessionCommands = "export WLR_DRM_DEVICES=/dev/dri/igpu";
-  environment.sessionVariables.NIXOS_OZONE_WL = "1";
+  environment.sessionVariables = {
+    NIXOS_OZONE_WL = "1";
+    SWAY_UNSUPPORTED_GPU = "1";
+  };
   services.greetd = {
     enable = true;
     settings.default_session = {
-      command = lib.getExe config.programs.sway.package;
+      command = "${lib.getExe config.programs.sway.package} --unsupported-gpu";
       user = "sachs";
     };
   };
@@ -93,8 +91,8 @@ in
   environment.etc."sway/config.d/blackwell.conf".text = ''
     set $term foot
     font pango:sans 10
-    output "Dell Inc. SE2417HGX 0x30594A42" pos 0 0
-    output "Acer Technologies Acer XF240H 0x6040511D" mode 1920x1080@144Hz pos 1920 0
+    output DP-1 mode 1920x1080@144Hz pos 0 0
+    output HDMI-A-1 pos 0 1080
     output * bg ~/.config/sway/bg fill
     bar bar-0 {
         position bottom
