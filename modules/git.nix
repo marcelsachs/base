@@ -10,10 +10,9 @@
       url."git@gist.github.com:".insteadOf = "https://gist.github.com/";
       safe.directory = [
         "/base"
-        "/docs"
         "/drone"
         "/sentry"
-        "/lab"
+        "/chats"
         "/etc/nixos"
       ];
     };
